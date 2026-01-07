@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 export default function Home() {
   return (
     <div className="font-sans text-slate-900">
-      <Navbar />
+      {/* <Navbar /> */}
       {/* Hero Section */}
       <section className="bg-slate-50 py-24">
         <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
