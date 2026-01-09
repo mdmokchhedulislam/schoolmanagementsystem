@@ -3,6 +3,11 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import SignupPage from "./pages/Signup";
+import DashboardPage from "./pages/dashboard/Dashboard";
+import StudentManagement from "./pages/dashboard/Student/StudentPage";
+import Teacher from "./pages/dashboard/Teacher/Teacher";
+import AddStudent from "./pages/dashboard/Student/AddStudent";
+import AddTeacher from "./pages/dashboard/Teacher/AddTeacher";
 
 
 function App() {
@@ -11,6 +16,11 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
       <Route path="/Signup" element={<SignupPage />} />
+      <Route path="/dashboard" element={<DashboardPage />} />
+      <Route path="/dashboard/student" element={<StudentManagement />} />
+      <Route path="/dashboard/student/add" element={<AddStudent />} />
+      <Route path="/dashboard/teacher" element={<Teacher />} />
+      <Route path="/dashboard/teacher/add" element={<AddTeacher />} />
       
     </Routes>
   );

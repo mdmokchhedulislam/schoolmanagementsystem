@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -75,12 +76,12 @@ function Navbar() {
                   exit={{ opacity: 0, y: 10 }}
                   className="absolute right-0 mt-3 w-44 bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-hidden"
                 >
-                  <a className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">
+                  <Link to={"/profile"} className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">
                     Profile
-                  </a>
-                  <a className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">
+                  </Link>
+                  <Link to={'/dashboard'} className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">
                     Dashboard
-                  </a>
+                  </Link>
                   <a className="block px-4 py-2 text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700">
                     Logout
                   </a>
