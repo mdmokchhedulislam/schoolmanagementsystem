@@ -1,10 +1,10 @@
 import React from "react";
 import Navbar from "../components/Navbar";
-import HeroSection from "../components/home/Herosection";
-import FeaturesSection from "../components/home/Featuresection";
-import HowItWorks from "../components/home/HowItWorksection";
-import PricingSection from "../components/home/PricingSection";
-import TestimonialsSection from "../components/home/TestomonialSection";
+import HeroSection from "../components/Landing/Herosection";
+import FeaturesSection from "../components/Landing/Featuresection";
+import HowItWorks from "../components/Landing/HowItWorksection";
+import PricingSection from "../components/Landing/PricingSection";
+import TestimonialsSection from "../components/Landing/TestomonialSection";
 
 export default function Home() {
   return (

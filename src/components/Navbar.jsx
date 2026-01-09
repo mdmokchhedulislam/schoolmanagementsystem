@@ -90,6 +90,8 @@ function Navbar() {
             </AnimatePresence>
           </div>
 
+          
+
           {/* Mobile Menu */}
           <button
             onClick={() => setOpen(!open)}

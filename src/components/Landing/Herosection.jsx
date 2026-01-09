@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function HeroSection() {
   return (
@@ -30,9 +31,9 @@ function HeroSection() {
 
           {/* CTA */}
           <div className="mt-8 flex flex-wrap gap-4">
-            <button className="px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition">
+            <Link to={'/login'} className="px-8 py-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg transition">
               Get Started Free
-            </button>
+            </Link>
 
             <button className="px-8 py-4 rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
               View Demo
