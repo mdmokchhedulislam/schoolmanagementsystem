@@ -23,12 +23,13 @@ function StudentManagement() {
   return (
     <div className="mt-10">
       <div className="flex justify-between items-center mb-4">
+
+        <Link to={'/dashboard/student/fees'} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Student fees</Link>
         <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
           Student Management
         </h2>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-          <Link to={"/dashboard/student/add"}><FaPlus /> Add Student</Link>
-        </button>
+
+        <Link to={'/dashboard/student/add'} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"> <FaPlus />Add Student</Link>
       </div>
 
       <input

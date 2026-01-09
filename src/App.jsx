@@ -8,6 +8,7 @@ import StudentManagement from "./pages/dashboard/Student/StudentPage";
 import Teacher from "./pages/dashboard/Teacher/Teacher";
 import AddStudent from "./pages/dashboard/Student/AddStudent";
 import AddTeacher from "./pages/dashboard/Teacher/AddTeacher";
+import StudentFee from "./pages/dashboard/Student/StudentFee";
 
 
 function App() {
@@ -18,9 +19,9 @@ function App() {
       <Route path="/Signup" element={<SignupPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/dashboard/student" element={<StudentManagement />} />
-      <Route path="/dashboard/student/add" element={<AddStudent />} />
+      <Route path="/dashboard/student/fees" element={<StudentFee />} />
       <Route path="/dashboard/teacher" element={<Teacher />} />
-      <Route path="/dashboard/teacher/add" element={<AddTeacher />} />
+      <Route path="/dashboard/student/add" element={<AddStudent />} />
       
     </Routes>
   );
