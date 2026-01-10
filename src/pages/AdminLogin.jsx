@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { loginAdmin } from "../redux/slices/authSlice";
+// import { useDispatch, useSelector } from "react-redux";
+// import { useNavigate } from "react-router-dom";
+// import { adminLogin } from "../redux/slices/authSlice";
 
 function AdminLogin() {
   const [formData, setFormData] = useState({
@@ -7,6 +13,11 @@ function AdminLogin() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { admin, loading, error } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
     setFormData({
@@ -17,85 +28,71 @@ function AdminLogin() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
-    // later -> API call here
+
+    dispatch(loginAdmin(formData));
+    console.log("login successfully");
+    navigate("/admin/dashboard")
+    
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 px-4">
-      
       <div className="w-full max-w-md bg-white/20 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/30">
-        
         <h2 className="text-3xl font-extrabold text-white text-center mb-2">
           Admin Login
         </h2>
-        <p className="text-center text-white/80 mb-8">
-          Login to School Management System
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           {/* Email */}
           <div>
-            <label className="text-white text-sm mb-1 block">Email</label>
+            <label className="text-white text-sm block mb-1">Email</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="admin@email.com"
               required
-              className="w-full px-4 py-3 rounded-xl bg-white/80 focus:bg-white outline-none focus:ring-2 focus:ring-indigo-500 transition"
+              className="w-full px-4 py-3 rounded-xl"
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="text-white text-sm mb-1 block">Password</label>
+            <label className="text-white text-sm block mb-1">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="••••••••"
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white/80 focus:bg-white outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                className="w-full px-4 py-3 rounded-xl"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-3 text-sm text-indigo-600 font-semibold"
+                className="absolute right-4 top-3 text-sm"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
+          {/* Error */}
+          {error && (
+            <p className="text-red-300 text-sm text-center">{error}</p>
+          )}
+
           {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold text-lg hover:scale-[1.02] hover:shadow-xl transition"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-
-        <div className="text-center mt-6 space-y-2">
-          <p className="text-white/80 text-sm">
-            Forgot password?
-            <span className="underline font-semibold cursor-pointer ml-1">
-              Reset
-            </span>
-          </p>
-
-          <p className="text-white/80 text-sm">
-            Don’t have an admin account?
-            <span className="underline font-semibold cursor-pointer ml-1">
-              Register
-            </span>
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -1,14 +1,17 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-const stats = [
-  { title: "Students", value: 2500, icon: "🎓", color: "from-blue-500 to-indigo-500" },
+
+function DashboardStats({students}) {
+  const stats = [
+  { title: "Students", value: students.length, icon: "🎓", color: "from-blue-500 to-indigo-500" },
   { title: "Teachers", value: 150, icon: "👩‍🏫", color: "from-green-500 to-teal-500" },
   { title: "Classes", value: 75, icon: "🏫", color: "from-purple-500 to-pink-500" },
   { title: "Attendance", value: "98%", icon: "📅", color: "from-yellow-400 to-orange-500" },
 ];
 
-function DashboardStats() {
+  console.log("student is ", students.length);
+  
   return (
     <div className="grid md:grid-cols-4 gap-6">
       {stats.map((item, index) => (
