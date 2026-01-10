@@ -1,95 +1,117 @@
-import React, { useState } from "react";
-import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllStudents } from "../../../redux/slices/studentSlice";
 import { Link } from "react-router-dom";
+// import { useDispatch, useSelector } from "react-redux";
+// import { fetchAllStudents } from "../../redux/slices/studentSlice";
+// import DashboardStats from "../../components/Dashboard/Stats";
 
-const initialStudents = [
-  { id: 1, name: "John Doe", class: "5A", age: 10, image: "https://i.pravatar.cc/100?img=20" },
-  { id: 2, name: "Jane Smith", class: "6B", age: 11, image: "https://i.pravatar.cc/100?img=25" },
-  { id: 3, name: "Michael Lee", class: "7C", age: 12, image: "https://i.pravatar.cc/100?img=30" },
-];
+function StudentPage() {
+  const dispatch = useDispatch();
+  const { students, loading, error } = useSelector((state) => state.students);
+  
 
-function StudentManagement() {
-  const [students, setStudents] = useState(initialStudents);
-  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState({ name: "", roll: "", section: "", className: "" });
 
-  const handleDelete = (id) => {
-    setStudents(students.filter((s) => s.id !== id));
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  useEffect(() => {
+    dispatch(fetchAllStudents());
+  }, [dispatch]);
+
+  const filteredStudents = students.filter((student) => {
+    return (
+      student.name.toLowerCase().includes(filters.name.toLowerCase()) &&
+      student.rollNo.toString().includes(filters.roll) &&
+      student.section.toLowerCase().includes(filters.section.toLowerCase()) &&
+      (student?.currentClass?.className || "").toLowerCase().includes(filters.className.toLowerCase())
+    );
+  });
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredStudents.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+
+  const handleFilterChange = (e) => {
+    setFilters({ ...filters, [e.target.name]: e.target.value });
+    setCurrentPage(1); 
   };
 
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
-    <div className="mt-10">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <Link to={"/admin/dashboard"}>go to dashboard</Link>
+      <h1 className="text-3xl font-bold mb-6">Student page</h1>
+      {/* <DashboardStats students={students} /> */}
 
-        <Link to={'/dashboard/student/fees'} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Student fees</Link>
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-          Student Management
-        </h2>
-
-        <Link to={'/dashboard/student/add'} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"> <FaPlus />Add Student</Link>
+      {/* Filter UI */}
+      <div className="bg-white p-4 rounded-lg shadow-md mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <input type="text" name="name" placeholder="Search by Name..." className="border p-2 rounded" value={filters.name} onChange={handleFilterChange} />
+        <input type="number" name="roll" placeholder="Roll No..." className="border p-2 rounded" value={filters.roll} onChange={handleFilterChange} />
+        <input type="text" name="className" placeholder="Class..." className="border p-2 rounded" value={filters.className} onChange={handleFilterChange} />
+        <input type="text" name="section" placeholder="Section..." className="border p-2 rounded" value={filters.section} onChange={handleFilterChange} />
       </div>
 
-      <input
-        type="text"
-        placeholder="Search students..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="w-full mb-4 p-2 border rounded-lg dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-      />
+      {loading && <p>Loading...</p>}
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white">
-              <th className="py-2 px-4 border-b">ID</th>
-              <th className="py-2 px-4 border-b">Student</th>
-              <th className="py-2 px-4 border-b">Class</th>
-              <th className="py-2 px-4 border-b">Age</th>
-              <th className="py-2 px-4 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map((student) => (
-              <tr key={student.id} className="hover:bg-slate-100 dark:hover:bg-slate-700">
-                <td className="py-2 px-4 border-b">{student.id}</td>
-                <td className="py-2 px-4 border-b flex items-center gap-3">
-                  <img
-                    src={student.image}
-                    alt={student.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
-                  <span className="text-slate-900 dark:text-white">{student.name}</span>
-                </td>
-                <td className="py-2 px-4 border-b">{student.class}</td>
-                <td className="py-2 px-4 border-b">{student.age}</td>
-                <td className="py-2 px-4 border-b flex gap-2">
-                  <button className="bg-yellow-400 px-3 py-1 rounded-lg hover:bg-yellow-500">
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(student.id)}
-                    className="bg-red-500 px-3 py-1 rounded-lg hover:bg-red-600"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filteredStudents.length === 0 && (
-              <tr>
-                <td colSpan={5} className="text-center py-4 text-slate-500 dark:text-slate-400">
-                  No students found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      {!loading && currentItems.length > 0 && (
+        <>
+          <div className="overflow-x-auto bg-white rounded-lg shadow">
+            <table className="min-w-full">
+              <thead className="bg-blue-600 text-white">
+                <tr>
+                  <th className="py-2 px-4 text-left">#</th>
+                  <th className="py-2 px-4 text-left">Name</th>
+                  <th className="py-2 px-4 text-left">Roll</th>
+                  <th className="py-2 px-4 text-left">Class</th>
+                  <th className="py-2 px-4 text-left">Section</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentItems.map((student, index) => (
+                  <tr key={student._id} className="border-b hover:bg-gray-50">
+                    <td className="py-2 px-4">{indexOfFirstItem + index + 1}</td>
+                    <td className="py-2 px-4">{student.name}</td>
+                    <td className="py-2 px-4">{student.rollNo}</td>
+                    <td className="py-2 px-4">{student?.currentClass?.className}</td>
+                    <td className="py-2 px-4">{student.section}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+     
+          <div className="flex justify-between items-center mt-6 bg-white p-4 rounded shadow">
+            <p className="text-sm text-gray-600">
+              Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, filteredStudents.length)} of {filteredStudents.length} students
+            </p>
+            <div className="flex gap-2">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(currentPage - 1)}
+                className={`px-4 py-2 rounded ${currentPage === 1 ? "bg-gray-200" : "bg-blue-600 text-white hover:bg-blue-700"}`}
+              >
+                Previous
+              </button>
+              
+              <span className="px-4 py-2 font-bold">Page {currentPage} of {totalPages}</span>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(currentPage + 1)}
+                className={`px-4 py-2 rounded ${currentPage === totalPages ? "bg-gray-200" : "bg-blue-600 text-white hover:bg-blue-700"}`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-export default StudentManagement;
+export default StudentPage;

@@ -11,6 +11,7 @@ import StudentFee from "./pages/dashboard/Student/StudentFee";
 import AdminLogin from "./pages/AdminLogin";
 import AdminSignup from "./pages/AdminRegistratioin";
 import AdminDashboard from "./pages/Admin/Dashboard";
+import StudentPage from "./pages/dashboard/Student/StudentPage";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
       <Route path="/admin/signup" element={<AdminSignup />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/dashboard/students" element={<StudentPage />} />
       
     </Routes>
   );
