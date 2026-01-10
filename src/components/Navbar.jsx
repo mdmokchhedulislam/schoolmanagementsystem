@@ -4,32 +4,39 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
 import { fetchSchoolProfile } from "../redux/slices/schoolSlice";
+import { 
+  User, 
+  LogOut, 
+  LayoutDashboard, 
+  ChevronDown, 
+  Sun, 
+  Moon, 
+  LogIn,
+  School as SchoolIcon 
+} from "lucide-react";
 
 function Navbar() {
-  const [open, setOpen] = useState(false); // Mobile menu
-  const [dark, setDark] = useState(false); // Dark mode
-  const [dropdown, setDropdown] = useState(false); // Profile dropdown
+  const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(false);
+  const [dropdown, setDropdown] = useState(false);
   const dropdownRef = useRef(null);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux state
-  const { token, admin } = useSelector((state) => state.auth);
+  // Redux state থেকে সঠিক নামে ডাটা আনা
+  const { token, admin, isAuthenticated } = useSelector((state) => state.auth);
   const { school } = useSelector((state) => state.school);
 
-  // Fetch school profile
   useEffect(() => {
     if (token) dispatch(fetchSchoolProfile());
   }, [token, dispatch]);
 
-  // Dark mode toggle
   useEffect(() => {
     if (dark) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
   }, [dark]);
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -40,9 +47,9 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Logout handler
   const handleLogout = () => {
     dispatch(logout());
+    setDropdown(false);
     navigate("/");
   };
 
@@ -51,131 +58,98 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b dark:border-slate-700">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
-        {/* Left: Logo */}
+        
+        {/* Left: Branding */}
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-extrabold">
-            <span className="text-blue-600">School</span>
+          <Link to="/" className="text-2xl font-extrabold flex items-center gap-1 group">
+            <span className="text-blue-600 group-hover:scale-105 transition-transform duration-200">School</span>
             <span className="text-slate-800 dark:text-white">Manager</span>
-          </h1>
+          </Link>
         </div>
 
-        {/* Center: Menu */}
-        <nav className="hidden md:flex gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
-          {menuItems.map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
-              className="hover:text-blue-600 transition"
-            >
-              {item}
-            </a>
-          ))}
-        </nav>
-
-        {/* Right: School Name + Profile + Dark Mode */}
-        <div className="flex items-center gap-4">
-
-          {/* School Name */}
-          {school && (
-            <div className="hidden md:block font-semibold text-slate-700 dark:text-slate-200">
-              {school.name}
-            </div>
-          )}
-
-          {/* Dark Mode */}
-          <button
-            onClick={() => setDark(!dark)}
-            className="text-xl"
-          >
-            {dark ? "🌙" : "☀️"}
-          </button>
-
-          {/* Profile Dropdown */}
-          {admin && (
-            <div className="relative" ref={dropdownRef}>
-              <img
-                onClick={() => setDropdown(!dropdown)}
-                src={admin.avatar || "https://i.pravatar.cc/40"}
-                alt="admin"
-                className="w-9 h-9 rounded-full cursor-pointer border"
-              />
-              <AnimatePresence>
-                {dropdown && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-3 w-52 bg-white dark:bg-slate-800 rounded-xl shadow-lg border dark:border-slate-700 overflow-hidden"
-                  >
-                    <div className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                      {admin.name || "Admin"}
-                    </div>
-                    {school && (
-                      <div className="px-4 py-1 text-xs text-slate-500 dark:text-slate-300">
-                        School: {school.name}
-                      </div>
-                    )}
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700"
-                    >
-                      Profile
-                    </Link>
-                    <Link
-                      to="/admin/dashboard"
-                      className="block px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700"
-                    >
-                      Dashboard
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700"
-                    >
-                      Logout
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setOpen(!open)}
-            className="md:hidden text-2xl dark:text-white"
-          >
-            ☰
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ height: 0 }}
-            animate={{ height: "auto" }}
-            exit={{ height: 0 }}
-            className="md:hidden px-6 py-4 bg-white dark:bg-slate-900 border-t dark:border-slate-700 space-y-3"
-          >
+        {/* Center: Desktop Menu */}
+        {!isAuthenticated && (
+          <nav className="hidden md:flex gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
             {menuItems.map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                className="block py-1"
-              >
+              <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-blue-600 transition-colors">
                 {item}
               </a>
             ))}
-            {school && (
-              <div className="py-1 font-semibold text-slate-700 dark:text-slate-200">
-                {school.name}
-              </div>
-            )}
-          </motion.div>
+          </nav>
         )}
-      </AnimatePresence>
+
+        {/* Right Section */}
+        <div className="flex items-center gap-4">
+          <button onClick={() => setDark(!dark)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            {dark ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-slate-600" />}
+          </button>
+
+          <div className="relative" ref={dropdownRef}>
+            {isAuthenticated ? (
+              <button
+                onClick={() => setDropdown(!dropdown)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 hover:shadow-md transition-all active:scale-95"
+              >
+                <div className="bg-blue-600 p-1 rounded-md text-white">
+                  <SchoolIcon size={16} />
+                </div>
+                <span className="font-bold text-slate-700 dark:text-slate-200 max-w-[150px] truncate">
+                  {school?.name || "Loading..."}
+                </span>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform duration-300 ${dropdown ? 'rotate-180' : ''}`} />
+              </button>
+            ) : (
+              <Link
+                to="/admin/login"
+                className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+              >
+                <LogIn size={18} />
+                <span>Login</span>
+              </Link>
+            )}
+
+            <AnimatePresence>
+              {dropdown && isAuthenticated && (
+                <motion.div
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                  className="absolute right-0 mt-3 w-60 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 py-2 overflow-hidden z-[60]"
+                >
+                  <div className="px-4 py-3 border-b dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 mb-1">
+                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest">Administrator</p>
+                    <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
+                      {/* তোমার backend থেকে আসা নামের field টি এখানে দাও */}
+                      {admin?.admin?.name || admin?.name || "Admin User"}
+                    </p>
+                  </div>
+
+                  <div className="px-2 space-y-1">
+                    <Link to="/admin/dashboard" onClick={() => setDropdown(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 rounded-lg transition-colors">
+                      <LayoutDashboard size={18} /> Dashboard
+                    </Link>
+                    <Link to="/profile" onClick={() => setDropdown(false)} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 rounded-lg transition-colors">
+                      <User size={18} /> My Profile
+                    </Link>
+                  </div>
+
+                  <div className="border-t dark:border-slate-700 my-2 mx-2"></div>
+
+                  <div className="px-2">
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                      <LogOut size={18} /> Logout
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-slate-600 dark:text-slate-300">
+            {open ? "✕" : "☰"}
+          </button>
+        </div>
+      </div>
     </header>
   );
 }

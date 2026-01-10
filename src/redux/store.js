@@ -1,14 +1,50 @@
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./slices/authSlice";
-import schoolReducer from "./slices/schoolSlice"
-import studentReducer from "./slices/studentSlice";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import { 
+  persistStore, 
+  persistReducer, 
+  FLUSH, 
+  REHYDRATE, 
+  PAUSE, 
+  PERSIST, 
+  PURGE, 
+  REGISTER 
+} from "redux-persist";
+import storage from "redux-persist/lib/storage"; 
 
-const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    school: schoolReducer,
-    students: studentReducer
-  }
+
+import authReducer from "./slices/authSlice";
+import schoolReducer from "./slices/schoolSlice";
+import studentReducer from "./slices/studentSlice";
+import classReducer from "./slices/classSlice";
+import academicYearReducer from "./slices/academicYearSlice";
+
+const rootReducer = combineReducers({
+  auth: authReducer,
+  school: schoolReducer,
+  students: studentReducer,
+  classes: classReducer,
+  academicYears: academicYearReducer,
 });
 
-export default store
+
+const persistConfig = {
+  key: "root",
+  version: 1,
+  storage,
+  whitelist: ["auth", "school"],
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
+});
+
+export const persistor = persistStore(store);
+export default store;

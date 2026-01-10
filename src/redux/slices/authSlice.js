@@ -11,7 +11,7 @@ export const loginAdmin = createAsyncThunk(
   async (formData, thunkAPI) => {
     try {
       const res = await axios.post(`${API}/login`, formData);
-      return res.data;
+      return res.data; 
     } catch (err) {
       return thunkAPI.rejectWithValue(
         err.response?.data?.message || "Login failed"
@@ -43,16 +43,19 @@ export const createAdmin = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    user: null,
-    token: localStorage.getItem("token"),
+    admin: null, // Navbar-এ admin নামে ডাকা হয়েছে, তাই user বদলে admin করলাম
+    token: localStorage.getItem("token") || null,
+    isAuthenticated: !!localStorage.getItem("token"), // টোকেন থাকলে সরাসরি True হবে
     loading: false,
     error: null,
     success: false
   },
   reducers: {
     logout: (state) => {
-      state.user = null;
+      state.admin = null;
       state.token = null;
+      state.isAuthenticated = false;
+      state.success = false;
       localStorage.removeItem("token");
     }
   },
@@ -66,13 +69,16 @@ const authSlice = createSlice({
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token;
-        state.user = action.payload;
+        // API থেকে আসা পুরো ডাটা বা admin অবজেক্টটি সেভ করা
+        state.admin = action.payload.admin || action.payload; 
+        state.isAuthenticated = true; 
         state.success = true;
         localStorage.setItem("token", action.payload.token);
       })
       .addCase(loginAdmin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.isAuthenticated = false;
       })
 
       /* ---------- CREATE ADMIN ---------- */
