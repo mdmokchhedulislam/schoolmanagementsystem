@@ -4,21 +4,26 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { fetchAllStudents } from "../../redux/slices/studentSlice";
 import DashboardStats from "../../components/Dashboard/Stats";
-import { PlusCircle, Users, School, UserPlus } from "lucide-react"; // আইকন লাইব্রেরি
+import { PlusCircle, Users, School, UserPlus } from "lucide-react"; 
 
 function AdminDashboard() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { students } = useSelector((state) => state.students);
+  const { teachers } = useSelector((state) => state.teachers);
+
+
+  console.log("student is ", students);
+  console.log("teacher is ", teachers);
+  
 
   useEffect(() => {
     dispatch(fetchAllStudents());
   }, [dispatch]);
 
-  // কুইক অ্যাকশন বাটন লিস্ট
   const quickActions = [
     { title: "Add Student", path: "/admin/dashboard/addstudent", icon: <UserPlus />, color: "bg-blue-600" },
-    { title: "Add Teacher", path: "/admin/dashboard/addteacher", icon: <Users />, color: "bg-indigo-600" },
+    { title: "Add Teacher", path: "/admin/dashboard/teachers/add", icon: <Users />, color: "bg-indigo-600" },
     { title: "Add Class", path: "/admin/dashboard/addclass", icon: <School />, color: "bg-emerald-600" },
   ];
 
@@ -48,9 +53,8 @@ function AdminDashboard() {
         </div>
       </div>
 
-      <DashboardStats students={students} />
+      <DashboardStats students={students} teachers={teachers} />
 
-      {/* Quick Access Grid - Visual Cards (Optional but looks great) */}
       <div className="mt-10">
         <h2 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
           <PlusCircle className="text-indigo-600" size={24} />

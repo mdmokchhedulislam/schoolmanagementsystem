@@ -2,12 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom"; 
 
-function DashboardStats({ students }) {
+function DashboardStats({ students,teachers }) {
   const navigate = useNavigate(); 
 
   const stats = [
     { title: "Students", value: students.length, icon: "🎓", color: "from-blue-500 to-indigo-500" },
-    { title: "Teachers", value: 150, icon: "👩‍🏫", color: "from-green-500 to-teal-500" },
+    { title: "Teachers", value: teachers.length, icon: "👩‍🏫", color: "from-green-500 to-teal-500" },
     { title: "Classes", value: 75, icon: "🏫", color: "from-purple-500 to-pink-500" },
     { title: "Attendance", value: "98%", icon: "📅", color: "from-yellow-400 to-orange-500" },
   ];

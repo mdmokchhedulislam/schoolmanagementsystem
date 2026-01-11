@@ -17,6 +17,7 @@ import schoolReducer from "./slices/schoolSlice";
 import studentReducer from "./slices/studentSlice";
 import classReducer from "./slices/classSlice";
 import academicYearReducer from "./slices/academicYearSlice";
+import teachersReducer from "./slices/teacherSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   students: studentReducer,
   classes: classReducer,
   academicYears: academicYearReducer,
+  teachers: teachersReducer,
 });
 
 

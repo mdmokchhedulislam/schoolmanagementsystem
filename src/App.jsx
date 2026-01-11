@@ -14,6 +14,10 @@ import AdminDashboard from "./pages/Admin/Dashboard";
 import StudentPage from "./pages/dashboard/Student/StudentPage";
 import StudentEditPage from "./pages/dashboard/Student/StudentEditPage";
 import SingleStudentPage from "./pages/dashboard/Student/SingleStudentPage";
+import AddTeacher from "./pages/dashboard/Teacher/AddTeacher";
+import TeacherPage from "./pages/dashboard/Teacher/Teacher";
+import UpdateTeacherPage from "./pages/dashboard/Teacher/updateTeacher";
+import TeacherDetailsPage from "./pages/dashboard/Teacher/TeacherDetailsPage";
 
 
 function App() {
@@ -26,10 +30,13 @@ function App() {
       <Route path="/dashboard/student" element={<StudentManagement />} />
       <Route path="/dashboard/student/fees" element={<StudentFee />} />
       <Route path="/dashboard/teacher" element={<Teacher />} />
-      <Route path="/dashboard/student/add" element={<AddStudent />} />
       <Route path="/admin/signup" element={<AdminSignup />} />
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/dashboard/teachers" element={<TeacherPage />} />
+      <Route path="/admin/dashboard/teachers/:id" element={<TeacherDetailsPage />} />
+      <Route path="/admin/dashboard/teachers/add" element={<AddTeacher />} />
+      <Route path="admin/dashboard/teachers/edit/:id" element={<UpdateTeacherPage />} />
       <Route path="/admin/dashboard/students" element={<StudentPage />} />
       <Route path="/admin/dashboard/addstudent" element={<AddStudent />} />
       <Route path="/admin/dashboard/students/edit/:id" element={<StudentEditPage />} />
