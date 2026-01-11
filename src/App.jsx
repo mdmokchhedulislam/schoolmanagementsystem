@@ -12,6 +12,8 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminSignup from "./pages/AdminRegistratioin";
 import AdminDashboard from "./pages/Admin/Dashboard";
 import StudentPage from "./pages/dashboard/Student/StudentPage";
+import StudentEditPage from "./pages/dashboard/Student/StudentEditPage";
+import SingleStudentPage from "./pages/dashboard/Student/SingleStudentPage";
 
 
 function App() {
@@ -30,7 +32,9 @@ function App() {
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/dashboard/students" element={<StudentPage />} />
       <Route path="/admin/dashboard/addstudent" element={<AddStudent />} />
-      
+      <Route path="/admin/dashboard/students/edit/:id" element={<StudentEditPage />} />
+      <Route path="/admin/dashboard/students/:id" element={<SingleStudentPage />} />
+
     </Routes>
   );
 }
