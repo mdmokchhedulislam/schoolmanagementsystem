@@ -10,7 +10,6 @@ function UpdateTeacherPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { singleTeacher, loading } = useSelector((state) => state.teachers);
-
   const [formData, setFormData] = useState({
     name: "",
     designation: "",

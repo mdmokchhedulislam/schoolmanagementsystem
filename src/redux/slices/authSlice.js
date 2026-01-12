@@ -43,9 +43,9 @@ export const createAdmin = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    admin: null, // Navbar-এ admin নামে ডাকা হয়েছে, তাই user বদলে admin করলাম
+    admin: null,
     token: localStorage.getItem("token") || null,
-    isAuthenticated: !!localStorage.getItem("token"), // টোকেন থাকলে সরাসরি True হবে
+    isAuthenticated: !!localStorage.getItem("token"), 
     loading: false,
     error: null,
     success: false

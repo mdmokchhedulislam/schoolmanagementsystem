@@ -14,18 +14,20 @@ import storage from "redux-persist/lib/storage";
 
 import authReducer from "./slices/authSlice";
 import schoolReducer from "./slices/schoolSlice";
-import studentReducer from "./slices/studentSlice";
+import studentsReducer from "./slices/studentSlice";
 import classReducer from "./slices/classSlice";
 import academicYearReducer from "./slices/academicYearSlice";
 import teachersReducer from "./slices/teacherSlice";
+import studentReducer from "./slices/student/studentSlice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   school: schoolReducer,
-  students: studentReducer,
+  students: studentsReducer,
   classes: classReducer,
   academicYears: academicYearReducer,
   teachers: teachersReducer,
+  student:studentReducer
 });
 
 
