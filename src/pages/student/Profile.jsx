@@ -71,7 +71,7 @@ function StudentProfile() {
             <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 uppercase leading-none">{student?.name}</h1>
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
               <span className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/10">
-                <GraduationCap size={14}/> ID: {student?.rollNo}
+                <GraduationCap size={14}/> ID: {student?._id}
               </span>
               <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-bold tracking-widest uppercase border border-emerald-500/10">
                 {student?.status || "Active"}

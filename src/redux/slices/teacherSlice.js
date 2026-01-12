@@ -1,16 +1,26 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-
 const API_URL = "http://localhost:5000/api/v1/teacher"; 
 
-// Helper function to get token
 const getAuthHeader = () => {
   const token = localStorage.getItem("token");
   return { headers: { Authorization: `Bearer ${token}` } };
 };
 
 // --- Async Thunks ---
+
+export const fetchTeacherProfile = createAsyncThunk(
+  "teachers/fetchProfile",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/profile`, getAuthHeader());
+      return response.data.teacher || response.data.data; 
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Profile fetch failed");
+    }
+  }
+);
 
 export const createTeacher = createAsyncThunk(
   "teachers/createTeacher",
@@ -78,6 +88,7 @@ const teacherSlice = createSlice({
   name: "teachers",
   initialState: {
     teachers: [],
+    profile: null, 
     loading: false,
     error: null,
     singleTeacher: null,
@@ -92,7 +103,18 @@ const teacherSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch All
+      // Fetch Profile
+      .addCase(fetchTeacherProfile.pending, (state) => { state.loading = true; })
+      .addCase(fetchTeacherProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.profile = action.payload;
+      })
+      .addCase(fetchTeacherProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch All Teachers
       .addCase(fetchTeachers.pending, (state) => { state.loading = true; })
       .addCase(fetchTeachers.fulfilled, (state, action) => {
         state.loading = false;
@@ -109,24 +131,19 @@ const teacherSlice = createSlice({
       })
 
       // Update
-      .addCase(updateTeacher.pending, (state) => { state.loading = true; })
       .addCase(updateTeacher.fulfilled, (state, action) => {
         state.loading = false;
-
-        const index = state.teachers.findIndex((t) => t._id === action.payload._id);
+        const index = state.teachers.findIndex((t) => t._id === action.payload?._id);
         if (index !== -1) {
           state.teachers[index] = action.payload;
         }
         state.singleTeacher = null;
       })
-      .addCase(updateTeacher.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
       
       // Create
       .addCase(createTeacher.fulfilled, (state, action) => {
-        state.teachers.unshift(action.payload.data); 
+        const newData = action.payload.data || action.payload;
+        state.teachers.unshift(newData); 
       })
 
       // Delete

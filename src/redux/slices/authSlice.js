@@ -4,7 +4,7 @@ import axios from "axios";
 const API = "http://localhost:5000/api/v1/admin";
 
 /* =========================
-   ADMIN LOGIN
+    ADMIN LOGIN
 ========================= */
 export const loginAdmin = createAsyncThunk(
   "auth/loginAdmin",
@@ -21,7 +21,7 @@ export const loginAdmin = createAsyncThunk(
 );
 
 /* =========================
-   CREATE / REGISTER ADMIN
+    CREATE / REGISTER ADMIN
 ========================= */
 export const createAdmin = createAsyncThunk(
   "auth/createAdmin",
@@ -38,13 +38,16 @@ export const createAdmin = createAsyncThunk(
 );
 
 /* =========================
-   SLICE
+    SLICE
 ========================= */
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    admin: null,
+    // রিফ্রেশ করলে যাতে ডাটা না হারায় তাই সব কি আলাদা করে চেক করা
+    admin: JSON.parse(localStorage.getItem("adminInfo")) || null,
     token: localStorage.getItem("token") || null,
+    role: localStorage.getItem("role") || null,
+    schoolId: localStorage.getItem("schoolId") || null,
     isAuthenticated: !!localStorage.getItem("token"), 
     loading: false,
     error: null,
@@ -52,11 +55,23 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
+      // ১. রিডাক্স স্টেট ক্লিন করা
       state.admin = null;
       state.token = null;
+      state.role = null;
+      state.schoolId = null;
       state.isAuthenticated = false;
       state.success = false;
+      state.error = null;
+      
+      // ২. লোকাল স্টোরেজ থেকে সব কি (Keys) মুছে ফেলা
       localStorage.removeItem("token");
+      localStorage.removeItem("adminInfo");
+      localStorage.removeItem("role");
+      localStorage.removeItem("schoolId");
+
+      // হার্ড রিফ্রেশ নিশ্চিত করার জন্য (ঐচ্ছিক)
+      console.log("Storage Cleared Successfully");
     }
   },
   extraReducers: (builder) => {
@@ -68,12 +83,23 @@ const authSlice = createSlice({
       })
       .addCase(loginAdmin.fulfilled, (state, action) => {
         state.loading = false;
-        state.token = action.payload.token;
-        // API থেকে আসা পুরো ডাটা বা admin অবজেক্টটি সেভ করা
-        state.admin = action.payload.admin || action.payload; 
-        state.isAuthenticated = true; 
         state.success = true;
-        localStorage.setItem("token", action.payload.token);
+        state.isAuthenticated = true; 
+        
+        // পেলোড থেকে ডাটা আলাদা করা
+        const { token, role, schoolId } = action.payload;
+        const adminData = action.payload.admin || action.payload;
+
+        state.token = token;
+        state.role = role;
+        state.schoolId = schoolId;
+        state.admin = adminData;
+
+        // লোকাল স্টোরেজে সবগুলো আলাদাভাবে সেভ করা
+        localStorage.setItem("token", token);
+        localStorage.setItem("role", role);
+        localStorage.setItem("schoolId", schoolId);
+        localStorage.setItem("adminInfo", JSON.stringify(adminData));
       })
       .addCase(loginAdmin.rejected, (state, action) => {
         state.loading = false;
