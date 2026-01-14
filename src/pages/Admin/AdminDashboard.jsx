@@ -5,6 +5,8 @@ import { motion } from "framer-motion";
 import { PlusCircle, Users, School, UserPlus } from "lucide-react";
 import { fetchAllStudents } from "../../redux/slices/studentSlice";
 import DashboardStats from "../../components/Dashboard/Stats";
+import { fetchAllClasses } from "../../redux/slices/classSlice";
+import { fetchTeachers } from "../../redux/slices/teacherSlice";
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
@@ -12,15 +14,22 @@ const AdminDashboard = () => {
   
   const { students } = useSelector((state) => state.students);
   const { teachers } = useSelector((state) => state.teachers);
+  const { classes } = useSelector((state) => state.classes);
+  console.log("teachers is ", teachers);
+  
 
   useEffect(() => {
     dispatch(fetchAllStudents());
+    dispatch(fetchAllClasses())
+    dispatch(fetchTeachers())
   }, [dispatch]);
 
   const quickActions = [
     { title: "Add Student", path: "/admin/dashboard/addstudent", icon: <UserPlus />, color: "bg-blue-600" },
     { title: "Add Teacher", path: "/admin/dashboard/teachers/add", icon: <Users />, color: "bg-indigo-600" },
     { title: "Add Class", path: "/admin/dashboard/addclass", icon: <School />, color: "bg-emerald-600" },
+    { title: "Add Class Teacher", path: "/admin/dashboard/classteacher", icon: <School />, color: "bg-emerald-600" },
+    { title: "Add Section", path: "/admin/dashboard/addsection", icon: <School />, color: "bg-emerald-600" },
   ];
 
   return (
@@ -50,7 +59,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Cards */}
-      <DashboardStats students={students} teachers={teachers} />
+      <DashboardStats students={students} teachers={teachers} classes={classes}  />
 
       {/* Management Shortcuts Grid */}
       <div className="mt-10">

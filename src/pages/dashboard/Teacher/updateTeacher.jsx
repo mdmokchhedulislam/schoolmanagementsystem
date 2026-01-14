@@ -29,7 +29,7 @@ function UpdateTeacherPage() {
   useEffect(() => {
     if (singleTeacher) {
       setFormData({
-        name: singleTeacher.user?.name || "",
+        name: singleTeacher.name || "",
         designation: singleTeacher.designation || "",
         department: singleTeacher.department || "",
         qualification: singleTeacher.qualification || "",

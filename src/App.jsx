@@ -20,6 +20,10 @@ import UpdateTeacherPage from "./pages/dashboard/Teacher/updateTeacher";
 import TeacherDetailsPage from "./pages/dashboard/Teacher/TeacherDetailsPage";
 import Login from "./pages/student/Login";
 import TeacherLogin from "./pages/Admin/AdminLogin";
+import ClassPage from "./pages/dashboard/Class/ClassPage";
+import Add_class_teacher from "./pages/dashboard/Section/Add_class_teacher";
+import AddClass from "./pages/dashboard/Class/Add_class";
+import AddSection from "./pages/dashboard/Section/Add_section";
 
 
 function App() {
@@ -36,6 +40,10 @@ function App() {
       <Route path="/admin/login" element={<TeacherLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/dashboard/teachers" element={<TeacherPage />} />
+      <Route path="/admin/dashboard/classes" element={<ClassPage />} />
+      <Route path="/admin/dashboard/addclass" element={<AddClass />} />
+      <Route path="/admin/dashboard/addsection" element={<AddSection />} />
+      <Route path="/admin/dashboard/classteacher" element={<Add_class_teacher />} />
       <Route path="/admin/dashboard/teachers/:id" element={<TeacherDetailsPage />} />
       <Route path="/admin/dashboard/teachers/add" element={<AddTeacher />} />
       <Route path="admin/dashboard/teachers/edit/:id" element={<UpdateTeacherPage />} />

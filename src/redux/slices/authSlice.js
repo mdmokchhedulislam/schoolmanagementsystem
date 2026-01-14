@@ -43,7 +43,6 @@ export const createAdmin = createAsyncThunk(
 const authSlice = createSlice({
   name: "auth",
   initialState: {
-    // রিফ্রেশ করলে যাতে ডাটা না হারায় তাই সব কি আলাদা করে চেক করা
     admin: JSON.parse(localStorage.getItem("adminInfo")) || null,
     token: localStorage.getItem("token") || null,
     role: localStorage.getItem("role") || null,
@@ -55,7 +54,7 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      // ১. রিডাক্স স্টেট ক্লিন করা
+
       state.admin = null;
       state.token = null;
       state.role = null;
@@ -64,13 +63,11 @@ const authSlice = createSlice({
       state.success = false;
       state.error = null;
       
-      // ২. লোকাল স্টোরেজ থেকে সব কি (Keys) মুছে ফেলা
       localStorage.removeItem("token");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("role");
       localStorage.removeItem("schoolId");
 
-      // হার্ড রিফ্রেশ নিশ্চিত করার জন্য (ঐচ্ছিক)
       console.log("Storage Cleared Successfully");
     }
   },
@@ -86,7 +83,6 @@ const authSlice = createSlice({
         state.success = true;
         state.isAuthenticated = true; 
         
-        // পেলোড থেকে ডাটা আলাদা করা
         const { token, role, schoolId } = action.payload;
         const adminData = action.payload.admin || action.payload;
 
@@ -95,7 +91,6 @@ const authSlice = createSlice({
         state.schoolId = schoolId;
         state.admin = adminData;
 
-        // লোকাল স্টোরেজে সবগুলো আলাদাভাবে সেভ করা
         localStorage.setItem("token", token);
         localStorage.setItem("role", role);
         localStorage.setItem("schoolId", schoolId);

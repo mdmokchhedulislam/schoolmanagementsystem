@@ -19,9 +19,9 @@ function StudentPage() {
 
   const filteredStudents = students.filter((student) => {
     return (
-      student.name.toLowerCase().includes(filters.name.toLowerCase()) &&
-      student.rollNo.toString().includes(filters.roll) &&
-      student.section.toLowerCase().includes(filters.section.toLowerCase()) &&
+      student?.name?.toLowerCase().includes(filters.name.toLowerCase()) &&
+      student?.rollNo?.toString().includes(filters.roll) &&
+      student?.section?.toLowerCase().includes(filters.section.toLowerCase()) &&
       (student?.currentClass?.className || "").toLowerCase().includes(filters.className.toLowerCase())
     );
   });

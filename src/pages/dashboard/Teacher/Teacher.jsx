@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTeachers, deleteTeacher } from "../../../redux/slices/teacherSlice"; 
+
 import { Link } from "react-router-dom";
 import { FaEdit, FaTrash, FaSearch, FaPlus, FaChalkboardTeacher } from "react-icons/fa";
 import { toast } from "react-hot-toast";
@@ -8,6 +9,9 @@ import { toast } from "react-hot-toast";
 function TeacherPage() {
   const dispatch = useDispatch();
   const { teachers, loading, error } = useSelector((state) => state.teachers);
+  console.log(teachers);
+  
+
 
   const [filters, setFilters] = useState({ name: "", teacherId: "", department: "", designation: "" });
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,11 +22,16 @@ function TeacherPage() {
   }, [dispatch]);
 
   const filteredTeachers = teachers.filter((teacher) => {
+    const name = teacher?.name || "";
+    const teacherId = teacher?.teacherId || teacher?._id || "";
+    const department = teacher?.department || "";
+    const designation = teacher?.designation || "";
+
     return (
-      (teacher?.user?.name || "").toLowerCase().includes(filters.name.toLowerCase()) &&
-      teacher.teacherId.toLowerCase().includes(filters.teacherId.toLowerCase()) &&
-      teacher.department.toLowerCase().includes(filters.department.toLowerCase()) &&
-      teacher.designation.toLowerCase().includes(filters.designation.toLowerCase())
+      name.toLowerCase().includes(filters.name.toLowerCase()) &&
+      teacherId.toLowerCase().includes(filters.teacherId.toLowerCase()) &&
+      department.toLowerCase().includes(filters.department.toLowerCase()) &&
+      designation.toLowerCase().includes(filters.designation.toLowerCase())
     );
   });
 
@@ -51,7 +60,6 @@ function TeacherPage() {
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <Link to={"/admin/dashboard"} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
@@ -69,7 +77,6 @@ function TeacherPage() {
         </Link>
       </div>
 
-      {/* Filter UI */}
       <div className="bg-white p-5 rounded-xl shadow-sm mb-6 grid grid-cols-1 md:grid-cols-4 gap-4 border border-gray-200">
         <div className="relative">
           <FaSearch className="absolute left-3 top-3 text-gray-400" />
@@ -110,20 +117,17 @@ function TeacherPage() {
               <tbody className="divide-y divide-gray-100">
                 {currentItems.map((teacher) => (
                   <tr key={teacher._id} className="hover:bg-blue-50 transition-colors">
-                    <td className="py-4 px-6 text-blue-700 font-bold">{teacher.teacherId}</td>
-                    
-                    {/* --- Updated Name Column --- */}
+                    <td className="py-4 px-6 text-blue-700 font-bold">{teacher.teacherId || teacher._id.slice(-6)}</td>
                     <td className="py-4 px-6">
                       <Link 
                         to={`/admin/dashboard/teachers/${teacher._id}`} 
                         className="font-semibold text-gray-800 hover:text-blue-600 hover:underline transition-all cursor-pointer"
                         title="View Full Profile"
                       >
-                        {teacher?.user?.name || "N/A"}
+                        {teacher?.name || "N/A"}
                       </Link>
+                      <div className="text-xs text-gray-400">{teacher?.email}</div>
                     </td>
-                    {/* ---------------------------- */}
-
                     <td className="py-4 px-6 text-gray-600">{teacher.department}</td>
                     <td className="py-4 px-6 text-gray-600">{teacher.designation}</td>
                     <td className="py-4 px-6 text-center">
@@ -155,7 +159,6 @@ function TeacherPage() {
             </table>
           </div>
 
-          {/* Pagination UI remains same... */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 bg-white p-5 rounded-xl shadow-sm border border-gray-200 gap-4">
             <p className="text-sm text-gray-500">
               Showing <span className="text-gray-800">{indexOfFirstItem + 1}</span> to <span className="text-gray-800">{Math.min(indexOfLastItem, filteredTeachers.length)}</span> of <span className="text-gray-800">{filteredTeachers.length}</span> Teachers
