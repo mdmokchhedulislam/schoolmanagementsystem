@@ -20,6 +20,9 @@ import academicYearReducer from "./slices/academicYearSlice";
 import teachersReducer from "./slices/teacherSlice";
 import studentReducer from "./slices/student/studentSlice";
 import sectionReducer from "./slices/sectionSlice";
+import classAssainReducer from "./slices/class_assainSlice";
+import paymentReducer from "./slices/payment_slice";
+import routineReducer from "./slices/routine_slice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -29,7 +32,10 @@ const rootReducer = combineReducers({
   academicYears: academicYearReducer,
   teachers: teachersReducer,
   student:studentReducer,
-  sections:sectionReducer
+  sections:sectionReducer,
+  classAssain:classAssainReducer,
+  payment:paymentReducer,
+  routine: routineReducer
 });
 
 

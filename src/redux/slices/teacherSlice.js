@@ -8,7 +8,21 @@ const getAuthHeader = () => {
   return { headers: { Authorization: `Bearer ${token}` } };
 };
 
-// --- Async Thunks ---
+export const loginTeacher = createAsyncThunk(
+  "teachers/login",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${API_URL}/login`, credentials);
+      if (response.data.success && response.data.token) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("role", "teacher");
+      }
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || "Login failed");
+    }
+  }
+);
 
 export const fetchTeacherProfile = createAsyncThunk(
   "teachers/fetchProfile",
@@ -82,8 +96,6 @@ export const deleteTeacher = createAsyncThunk(
   }
 );
 
-// --- Slice ---
-
 const teacherSlice = createSlice({
   name: "teachers",
   initialState: {
@@ -91,6 +103,7 @@ const teacherSlice = createSlice({
     profile: null, 
     loading: false,
     error: null,
+    isAuthenticated: !!localStorage.getItem("token") && localStorage.getItem("role") === "teacher",
     singleTeacher: null,
   },
   reducers: {
@@ -100,11 +113,31 @@ const teacherSlice = createSlice({
     resetSingleTeacher: (state) => {
       state.singleTeacher = null;
     },
+    logoutTeacher: (state) => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      state.isAuthenticated = false;
+      state.profile = null;
+    }
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Profile
-      .addCase(fetchTeacherProfile.pending, (state) => { state.loading = true; })
+      .addCase(loginTeacher.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginTeacher.fulfilled, (state, action) => {
+        state.loading = false;
+        state.isAuthenticated = true;
+        state.profile = { name: action.payload.name };
+      })
+      .addCase(loginTeacher.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(fetchTeacherProfile.pending, (state) => { 
+        state.loading = true; 
+      })
       .addCase(fetchTeacherProfile.fulfilled, (state, action) => {
         state.loading = false;
         state.profile = action.payload;
@@ -113,9 +146,9 @@ const teacherSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Fetch All Teachers
-      .addCase(fetchTeachers.pending, (state) => { state.loading = true; })
+      .addCase(fetchTeachers.pending, (state) => { 
+        state.loading = true; 
+      })
       .addCase(fetchTeachers.fulfilled, (state, action) => {
         state.loading = false;
         state.teachers = action.payload;
@@ -124,13 +157,9 @@ const teacherSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-      
-      // Fetch Single
       .addCase(fetchTeacherById.fulfilled, (state, action) => {
         state.singleTeacher = action.payload;
       })
-
-      // Update
       .addCase(updateTeacher.fulfilled, (state, action) => {
         state.loading = false;
         const index = state.teachers.findIndex((t) => t._id === action.payload?._id);
@@ -139,19 +168,15 @@ const teacherSlice = createSlice({
         }
         state.singleTeacher = null;
       })
-      
-      // Create
       .addCase(createTeacher.fulfilled, (state, action) => {
         const newData = action.payload.data || action.payload;
         state.teachers.unshift(newData); 
       })
-
-      // Delete
       .addCase(deleteTeacher.fulfilled, (state, action) => {
         state.teachers = state.teachers.filter(t => t._id !== action.payload);
       });
   },
 });
 
-export const { clearError, resetSingleTeacher } = teacherSlice.actions;
+export const { clearError, resetSingleTeacher, logoutTeacher } = teacherSlice.actions;
 export default teacherSlice.reducer;

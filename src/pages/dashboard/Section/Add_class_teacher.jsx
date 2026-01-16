@@ -3,10 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import { FiUserCheck, FiTrash2 } from "react-icons/fi";
 
-// সব স্লাইস থেকে অ্যাকশন ইমপোর্ট
 import { fetchSections, updateSection, resetSectionStatus } from "../../../redux/slices/sectionSlice"; 
 import { fetchAllClasses } from "../../../redux/slices/classSlice";
-import { fetchTeachers } from "../../../redux/slices/teacherSlice"; // আপনার দেওয়া স্লাইস
+import { fetchTeachers } from "../../../redux/slices/teacherSlice"; 
 
 const Add_class_teacher = () => {
   const dispatch = useDispatch();
@@ -14,7 +13,7 @@ const Add_class_teacher = () => {
   // Redux States
   const { sections, loading, success, error } = useSelector((state) => state.sections);
   const { classes } = useSelector((state) => state.classes);
-  const { teachers } = useSelector((state) => state.teachers); // টিচার স্লাইস থেকে ডাটা
+  const { teachers } = useSelector((state) => state.teachers); 
 
   const [formData, setFormData] = useState({
     classId: "",
@@ -24,14 +23,13 @@ const Add_class_teacher = () => {
 
   const [filteredSections, setFilteredSections] = useState([]);
 
-  // ১. পেজ লোড হলে সব ডাটা নিয়ে আসা
   useEffect(() => {
     dispatch(fetchSections());
     dispatch(fetchAllClasses());
-    dispatch(fetchTeachers()); // আপনার নতুন স্লাইস থেকে টিচার নিয়ে আসবে
+    dispatch(fetchTeachers()); 
   }, [dispatch]);
 
-  // ২. ক্লাস সিলেক্ট করলে সেকশন ফিল্টার হওয়া
+
   useEffect(() => {
     if (formData.classId) {
       const filtered = sections.filter(sec => 
@@ -43,7 +41,7 @@ const Add_class_teacher = () => {
     }
   }, [formData.classId, sections]);
 
-  // ৩. সাকসেস বা এরর হ্যান্ডেলিং
+
   useEffect(() => {
     if (success) {
       toast.success("Teacher assigned successfully!");
@@ -62,7 +60,6 @@ const Add_class_teacher = () => {
       return toast.error("Please select both Section and Teacher");
     }
     
-    // সেকশন স্লাইসের updateSection ব্যবহার করে টিচার অ্যাসাইন করা
     dispatch(updateSection({ 
       id: formData.sectionId, 
       sectionData: { classTeacher: formData.classTeacher } 
@@ -124,7 +121,7 @@ const Add_class_teacher = () => {
               required
             >
               <option value="">Choose Teacher</option>
-              {/* আপনার টিচার স্লাইস থেকে আসা ডাটা এখানে ড্রপডাউন হচ্ছে */}
+       
               {teachers?.map(t => (
                 <option key={t._id} value={t._id}>{t.name}</option>
               ))}

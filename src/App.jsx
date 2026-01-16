@@ -18,12 +18,15 @@ import AddTeacher from "./pages/dashboard/Teacher/AddTeacher";
 import TeacherPage from "./pages/dashboard/Teacher/Teacher";
 import UpdateTeacherPage from "./pages/dashboard/Teacher/updateTeacher";
 import TeacherDetailsPage from "./pages/dashboard/Teacher/TeacherDetailsPage";
-import Login from "./pages/student/Login";
+import Login from "./pages/Login";
 import TeacherLogin from "./pages/Admin/AdminLogin";
 import ClassPage from "./pages/dashboard/Class/ClassPage";
 import Add_class_teacher from "./pages/dashboard/Section/Add_class_teacher";
 import AddClass from "./pages/dashboard/Class/Add_class";
 import AddSection from "./pages/dashboard/Section/Add_section";
+import TeacherDashboard from "./pages/Admin/TeacherDashboard";
+import StudentProfile from "./pages/student/Profile";
+import Routine_page from "./pages/dashboard/routine/Routine_page";
 
 
 function App() {
@@ -31,15 +34,17 @@ function App() {
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/student/profile" element={<StudentProfile />} />
       <Route path="/Signup" element={<SignupPage />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/dashboard/student" element={<StudentManagement />} />
       <Route path="/dashboard/student/fees" element={<StudentFee />} />
-      <Route path="/dashboard/teacher" element={<Teacher />} />
+      <Route path="/dashboard/teacher" element={<TeacherDashboard />} />
       <Route path="/admin/signup" element={<AdminSignup />} />
       <Route path="/admin/login" element={<TeacherLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/dashboard/teachers" element={<TeacherPage />} />
+      <Route path="/admin/dashboard/routine" element={<Routine_page />} />
       <Route path="/admin/dashboard/classes" element={<ClassPage />} />
       <Route path="/admin/dashboard/addclass" element={<AddClass />} />
       <Route path="/admin/dashboard/addsection" element={<AddSection />} />

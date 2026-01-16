@@ -8,7 +8,6 @@ function TeacherLogin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux থেকে ডাটা নিচ্ছি
   const { isAuthenticated, loading, user } = useSelector((state) => state.auth || {});
   console.log("user data is ", user);
   
@@ -31,7 +30,7 @@ function TeacherLogin() {
     
   };
 
-  // রোল অনুযায়ী সঠিক ড্যাশবোর্ডে পাঠানোর লজিক
+
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.role === "admin") {
@@ -39,7 +38,6 @@ function TeacherLogin() {
       } else if (user.role === "teacher") {
         navigate("/teacher/dashboard");
       } else {
-        // অন্য কোনো রোল হলে ডিফল্ট হিসেবে টিচার ড্যাশবোর্ডেই পাঠাবে
         navigate("/teacher/dashboard");
       }
     }
