@@ -1,37 +1,72 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addRoutine } from "../../../redux/slices/routine_slice.js";
-import { Plus, Trash2, Save, X } from "lucide-react";
+import { addRoutine, clearRoutineState } from "../../../redux/slices/routine_slice.js";
+import { fetchSections } from "../../../redux/slices/sectionSlice.js"; 
+import { fetchTeachers } from "../../../redux/slices/teacherSlice.js"; 
+import { fetchDays } from "../../../redux/slices/daySlice.js"; 
+import { fetchPeriods } from "../../../redux/slices/period_slice.js"; 
+import { fetchSubjects } from "../../../redux/slices/subject_slice.js"; 
+
+import { useNavigate } from "react-router-dom";
+import { Plus, Trash2, Save, ArrowLeft, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 
-const Routine_page = () => {
+const AddRoutine = () => {
   const dispatch = useDispatch();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
-  // Form State: Tomar JSON structure onujayi
+  // Redux Store logic
+  const { sections } = useSelector((state) => state.sections); 
+  const { teachers } = useSelector((state) => state.teachers);
+  const { days } = useSelector((state) => state.days); 
+  const { periods } = useSelector((state) => state.periods);
+  const { subjects } = useSelector((state) => state.subjects); 
+  const { loading, success, error } = useSelector((state) => state.routine);
+
+  // 1. STATE DEFINE (Eikhane thik thakle 'formData is not defined' error ashbe na)
   const [formData, setFormData] = useState({
     dayId: "",
     periodId: "",
-    schedules: [
-      { sectionId: "", subjectId: "", teacherId: "" }
-    ]
+    schedules: [{ sectionId: "", subjectId: "", teacherId: "" }]
   });
 
-  // Notun schedule row add kora
+  // Initial Data Fetch
+  useEffect(() => {
+    dispatch(fetchSections());
+    dispatch(fetchTeachers());
+    dispatch(fetchDays()); 
+    dispatch(fetchPeriods()); 
+    dispatch(fetchSubjects());
+  }, [dispatch]);
+
+  // Success/Error Handling
+  useEffect(() => {
+    if (success) {
+      toast.success("Routine added successfully!");
+      dispatch(clearRoutineState());
+      navigate("/admin/dashboard/routine");
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearRoutineState());
+    }
+  }, [success, error, navigate, dispatch]);
+
+  // Helper Functions
   const addScheduleRow = () => {
-    setFormData({
-      ...formData,
-      schedules: [...formData.schedules, { sectionId: "", subjectId: "", teacherId: "" }]
-    });
+    setFormData((prev) => ({
+      ...prev,
+      schedules: [...prev.schedules, { sectionId: "", subjectId: "", teacherId: "" }]
+    }));
   };
 
-  // Row delete kora
   const removeScheduleRow = (index) => {
-    const updatedSchedules = formData.schedules.filter((_, i) => i !== index);
-    setFormData({ ...formData, schedules: updatedSchedules });
+    setFormData((prev) => ({
+      ...prev,
+      schedules: prev.schedules.filter((_, i) => i !== index)
+    }));
   };
 
-  // Input change handler
   const handleScheduleChange = (index, field, value) => {
     const updatedSchedules = [...formData.schedules];
     updatedSchedules[index][field] = value;
@@ -40,129 +75,141 @@ const Routine_page = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitting Data:", formData);
+    
+    if(!formData.dayId || !formData.periodId) return toast.error("Select Day and Period!");
+    const isInvalid = formData.schedules.some(s => !s.sectionId || !s.subjectId || !s.teacherId);
+    if(isInvalid) return toast.error("Please fill all fields!");
+
+    // Backend-er chahida moto Payload pathano
     dispatch(addRoutine(formData));
-    setIsModalOpen(false);
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <button 
-        onClick={() => setIsModalOpen(true)}
-        className="bg-black text-white px-6 py-3 font-black uppercase flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-blue-600 transition-all"
-      >
-        <Plus size={20} /> Bulk Add Routine
-      </button>
+    <div className="p-8 bg-[#f0f2f5] min-h-screen font-sans">
+      <div className="max-w-5xl mx-auto">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 font-black uppercase text-xs mb-6 hover:text-blue-600 transition-colors">
+          <ArrowLeft size={16} /> Back
+        </button>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4">
-          <div className="bg-white border-4 border-black w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-[15px_15px_0px_0px_rgba(0,0,0,1)]">
-            
-            {/* Modal Header */}
-            <div className="bg-black text-white p-4 flex justify-between items-center sticky top-0 z-10">
-              <h2 className="text-xl font-black uppercase italic">Add Bulk Schedules</h2>
-              <button onClick={() => setIsModalOpen(false)}><X size={24} /></button>
+        <div className="bg-white border-[4px] border-black shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
+          <div className="bg-black text-white p-6 border-b-4 border-black">
+            <h1 className="text-3xl font-black uppercase italic tracking-tighter">Bulk Routine Entry</h1>
+            <p className="text-blue-400 text-xs font-bold uppercase mt-1 italic">Single or Multiple Entries Supported</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="p-8 space-y-10">
+            {/* Day & Period selection */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="relative">
+                <label className="block text-xs font-black uppercase mb-2 italic text-gray-500">Select Day</label>
+                <select 
+                  className="w-full border-2 border-black p-3 font-bold outline-none appearance-none focus:bg-yellow-50 cursor-pointer"
+                  value={formData.dayId}
+                  onChange={(e) => setFormData({...formData, dayId: e.target.value})}
+                  required
+                >
+                  <option value="">-- Choose Day --</option>
+                  {days?.map(day => <option key={day._id} value={day._id}>{day.name}</option>)}
+                </select>
+                <ChevronDown className="absolute right-3 bottom-3 pointer-events-none opacity-50" size={20} />
+              </div>
+
+              <div className="relative">
+                <label className="block text-xs font-black uppercase mb-2 italic text-gray-500">Select Period</label>
+                <select 
+                  className="w-full border-2 border-black p-3 font-bold outline-none appearance-none focus:bg-yellow-50 cursor-pointer"
+                  value={formData.periodId}
+                  onChange={(e) => setFormData({...formData, periodId: e.target.value})}
+                  required
+                >
+                  <option value="">-- Choose Period --</option>
+                  {periods?.map(p => (
+                    <option key={p._id} value={p._id}>
+                      Period {p.periodNumber} ({p.startTime} - {p.endTime})
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 bottom-3 pointer-events-none opacity-50" size={20} />
+              </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* IDs Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-black uppercase">Day ID</label>
-                  <input 
-                    className="w-full border-2 border-black p-2 font-bold outline-none focus:bg-yellow-50"
-                    placeholder="69699e69056d2a268f930d69"
-                    onChange={(e) => setFormData({...formData, dayId: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black uppercase">Period ID</label>
-                  <input 
-                    className="w-full border-2 border-black p-2 font-bold outline-none focus:bg-yellow-50"
-                    placeholder="6969a083056d2a268f930d8b"
-                    onChange={(e) => setFormData({...formData, periodId: e.target.value})}
-                    required
-                  />
-                </div>
+            {/* Schedules Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-black uppercase italic border-b-2 border-black pb-2 flex justify-between items-center">
+                <span>Assign Sections</span>
+              </h3>
+              
+              <div className="space-y-4">
+                {formData.schedules.map((row, index) => (
+                  <div key={index} className="flex flex-wrap md:flex-nowrap gap-4 items-center bg-gray-50 p-4 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]">
+                    <div className="flex-1 min-w-[180px]">
+                      <select 
+                        className="w-full border-2 border-black p-2 text-[11px] font-bold"
+                        value={row.sectionId}
+                        onChange={(e) => handleScheduleChange(index, "sectionId", e.target.value)}
+                        required
+                      >
+                        <option value="">-- Section --</option>
+                        {sections?.map(s => <option key={s._id} value={s._id}>Class {s.className.toUpperCase()} - {s.sectionName}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="flex-1 min-w-[140px]">
+                      <select 
+                        className="w-full border-2 border-black p-2 text-[11px] font-bold"
+                        value={row.subjectId}
+                        onChange={(e) => handleScheduleChange(index, "subjectId", e.target.value)}
+                        required
+                      >
+                        <option value="">-- Subject --</option>
+                        {subjects?.map(sub => <option key={sub._id} value={sub._id}>{sub.name}</option>)}
+                      </select>
+                    </div>
+
+                    <div className="flex-1 min-w-[140px]">
+                      <select 
+                        className="w-full border-2 border-black p-2 text-[11px] font-bold"
+                        value={row.teacherId}
+                        onChange={(e) => handleScheduleChange(index, "teacherId", e.target.value)}
+                        required
+                      >
+                        <option value="">-- Teacher --</option>
+                        {teachers?.map(t => <option key={t._id} value={t._id}>{t.name || t.teacherName}</option>)}
+                      </select>
+                    </div>
+
+                    {formData.schedules.length > 1 && (
+                      <button 
+                        type="button" 
+                        onClick={() => removeScheduleRow(index)}
+                        className="text-red-500 hover:bg-black p-2 border-2 border-black transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
 
-              {/* Schedules Table Section */}
-              <div className="border-2 border-black">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-100 border-b-2 border-black">
-                    <tr>
-                      <th className="p-2 border-r-2 border-black text-left text-[10px] font-black">SECTION ID</th>
-                      <th className="p-2 border-r-2 border-black text-left text-[10px] font-black">SUBJECT ID</th>
-                      <th className="p-2 border-r-2 border-black text-left text-[10px] font-black">TEACHER ID</th>
-                      <th className="p-2 text-center text-[10px] font-black">ACTION</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {formData.schedules.map((row, index) => (
-                      <tr key={index} className="border-b border-gray-300 last:border-0">
-                        <td className="p-1 border-r-2 border-black">
-                          <input 
-                            className="w-full p-1 text-[10px] outline-none font-semibold"
-                            placeholder="Section ID..."
-                            onChange={(e) => handleScheduleChange(index, "sectionId", e.target.value)}
-                            required
-                          />
-                        </td>
-                        <td className="p-1 border-r-2 border-black">
-                          <input 
-                            className="w-full p-1 text-[10px] outline-none font-semibold"
-                            placeholder="Subject ID..."
-                            onChange={(e) => handleScheduleChange(index, "subjectId", e.target.value)}
-                            required
-                          />
-                        </td>
-                        <td className="p-1 border-r-2 border-black">
-                          <input 
-                            className="w-full p-1 text-[10px] outline-none font-semibold"
-                            placeholder="Teacher ID..."
-                            onChange={(e) => handleScheduleChange(index, "teacherId", e.target.value)}
-                            required
-                          />
-                        </td>
-                        <td className="p-1 text-center">
-                          <button 
-                            type="button"
-                            onClick={() => removeScheduleRow(index)}
-                            className="text-red-500 hover:bg-red-50 p-1 rounded"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <button 
+                type="button" onClick={addScheduleRow}
+                className="w-full border-2 border-dashed border-black p-3 font-black uppercase text-xs hover:bg-blue-600 hover:text-white transition-all italic"
+              >
+                <Plus size={16} className="inline mr-2" /> Add Another Row
+              </button>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-between items-center">
-                <button 
-                  type="button"
-                  onClick={addScheduleRow}
-                  className="bg-blue-600 text-white px-4 py-2 text-xs font-black uppercase flex items-center gap-1 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-1"
-                >
-                  <Plus size={14} /> Add More Section
-                </button>
-
-                <button 
-                  type="submit"
-                  className="bg-black text-white px-8 py-3 font-black uppercase italic flex items-center gap-2 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] active:translate-y-1"
-                >
-                  <Save size={18} /> Save All Schedules
-                </button>
-              </div>
-            </form>
-          </div>
+            <button 
+              type="submit" disabled={loading}
+              className="w-full bg-black text-white p-5 font-black uppercase italic text-xl shadow-[8px_8px_0px_0px_rgba(59,130,246,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all flex items-center justify-center gap-4 border-2 border-black"
+            >
+              {loading ? "SAVING..." : <><Save size={24} /> Submit Routine</>}
+            </button>
+          </form>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default Routine_page;
+export default AddRoutine;

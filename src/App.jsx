@@ -27,6 +27,7 @@ import AddSection from "./pages/dashboard/Section/Add_section";
 import TeacherDashboard from "./pages/Admin/TeacherDashboard";
 import StudentProfile from "./pages/student/Profile";
 import Routine_page from "./pages/dashboard/routine/Routine_page";
+import AddRoutine from "./pages/dashboard/routine/Add_routine";
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
       <Route path="/admin/dashboard/teachers" element={<TeacherPage />} />
       <Route path="/admin/dashboard/routine" element={<Routine_page />} />
+      <Route path="/admin/dashboard/routine/add" element={<AddRoutine />} />
       <Route path="/admin/dashboard/classes" element={<ClassPage />} />
       <Route path="/admin/dashboard/addclass" element={<AddClass />} />
       <Route path="/admin/dashboard/addsection" element={<AddSection />} />

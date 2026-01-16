@@ -33,7 +33,7 @@ export const addRoutine = createAsyncThunk(
   "routine/addRoutine",
   async (formData, thunkAPI) => {
     try {
-      const res = await axios.post(`${API}/add_routine`, formData, getConfig(thunkAPI));
+      const res = await axios.post(`${API}/create`, formData, getConfig(thunkAPI));
       // Data add korar por thik moto list update korar jonno full routine abar niye asha bhalo
       thunkAPI.dispatch(getRoutine()); 
       return res.data;

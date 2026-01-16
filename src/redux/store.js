@@ -23,6 +23,9 @@ import sectionReducer from "./slices/sectionSlice";
 import classAssainReducer from "./slices/class_assainSlice";
 import paymentReducer from "./slices/payment_slice";
 import routineReducer from "./slices/routine_slice";
+import daysReducer from "./slices/daySlice";
+import periodsReducer from "./slices/period_slice";
+import subjectsReducer from "./slices/subject_slice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -35,7 +38,10 @@ const rootReducer = combineReducers({
   sections:sectionReducer,
   classAssain:classAssainReducer,
   payment:paymentReducer,
-  routine: routineReducer
+  routine: routineReducer,
+  days: daysReducer,
+  periods:periodsReducer,
+  subjects:subjectsReducer
 });
 
 
