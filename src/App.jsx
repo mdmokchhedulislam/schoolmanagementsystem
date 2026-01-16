@@ -28,6 +28,8 @@ import TeacherDashboard from "./pages/Admin/TeacherDashboard";
 import StudentProfile from "./pages/student/Profile";
 import Routine_page from "./pages/dashboard/routine/Routine_page";
 import AddRoutine from "./pages/dashboard/routine/Add_routine";
+import StudentRoutine from "./pages/dashboard/Student/Student_routine";
+import TeacherRoutine from "./pages/dashboard/Teacher/Teacher_routine";
 
 
 function App() {
@@ -37,10 +39,12 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/student/profile" element={<StudentProfile />} />
       <Route path="/Signup" element={<SignupPage />} />
+      <Route path="/student/routine" element={<StudentRoutine />} />
       <Route path="/dashboard" element={<DashboardPage />} />
       <Route path="/dashboard/student" element={<StudentManagement />} />
       <Route path="/dashboard/student/fees" element={<StudentFee />} />
       <Route path="/dashboard/teacher" element={<TeacherDashboard />} />
+      <Route path="/dashboard/teacher/routine" element={<TeacherRoutine />} />
       <Route path="/admin/signup" element={<AdminSignup />} />
       <Route path="/admin/login" element={<TeacherLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
