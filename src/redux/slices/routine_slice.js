@@ -12,6 +12,21 @@ const getConfig = (thunkAPI) => {
 };
 
 /* =========================
+    ATTENDANCE: CHECK ACCESS (NEW)
+========================= */
+export const checkAttendanceAccess = createAsyncThunk(
+  "routine/checkAttendanceAccess",
+  async (sectionId, thunkAPI) => {
+    try {
+      const res = await axios.get(`${API}/check-access/${sectionId}`, getConfig(thunkAPI));
+      return res.data; // Expected: { hasAccess: true/false, message: "..." }
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.response?.data?.message || "Failed to verify access");
+    }
+  }
+);
+
+/* =========================
     ADMIN: GET ALL ROUTINE
 ========================= */
 export const getRoutine = createAsyncThunk(
@@ -72,8 +87,6 @@ export const addRoutine = createAsyncThunk(
   }
 );
 
-
-
 /* =========================
     SLICE
 ========================= */
@@ -83,6 +96,9 @@ const routineSlice = createSlice({
     routineData: [],       
     teacherRoutine: [],    
     studentRoutine: [],    
+    // Attendance Access States
+    hasAttendanceAccess: true, 
+    accessMessage: "",
     loading: false,
     error: null,
     success: false,
@@ -93,10 +109,29 @@ const routineSlice = createSlice({
       state.error = null;
       state.success = false;
       state.message = "";
+      state.accessMessage = "";
+      state.hasAttendanceAccess = true;
     }
   },
   extraReducers: (builder) => {
     builder
+      // CHECK ATTENDANCE ACCESS
+      .addCase(checkAttendanceAccess.pending, (state) => { 
+        state.loading = true; 
+        state.error = null;
+      })
+      .addCase(checkAttendanceAccess.fulfilled, (state, action) => {
+        state.loading = false;
+        state.hasAttendanceAccess = action.payload.hasAccess;
+        state.accessMessage = action.payload.message;
+      })
+      .addCase(checkAttendanceAccess.rejected, (state, action) => {
+        state.loading = false;
+        state.hasAttendanceAccess = false;
+        state.error = action.payload;
+        state.accessMessage = action.payload;
+      })
+
       // GET ADMIN ROUTINE
       .addCase(getRoutine.pending, (state) => { state.loading = true; })
       .addCase(getRoutine.fulfilled, (state, action) => {
@@ -136,8 +171,6 @@ const routineSlice = createSlice({
         state.success = true;
         state.message = action.payload.message;
       });
-      
-    
   }
 });
 

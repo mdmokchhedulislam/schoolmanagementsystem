@@ -3,12 +3,11 @@ import axios from "axios";
 
 const API = "http://localhost:5000/api/v1/section/";
 
-// ১. Fetch All Sections
 export const fetchSections = createAsyncThunk(
   "sections/fetchSections",
   async (_, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.token; 
+      const token = localStorage.getItem("token"); 
       const res = await axios.get(API, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -21,12 +20,11 @@ export const fetchSections = createAsyncThunk(
   }
 );
 
-// ২. Create New Section
 export const createSection = createAsyncThunk(
   "sections/createSection",
   async (sectionData, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.token;
+      const token = localStorage.getItem("token");
       const res = await axios.post(API, sectionData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -39,12 +37,11 @@ export const createSection = createAsyncThunk(
   }
 );
 
-// ৩. Update Section
 export const updateSection = createAsyncThunk(
   "sections/updateSection",
   async ({ id, sectionData }, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.token;
+      const token = localStorage.getItem("token");
       const res = await axios.put(`${API}${id}`, sectionData, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -57,12 +54,11 @@ export const updateSection = createAsyncThunk(
   }
 );
 
-// ৪. Delete Section
 export const deleteSection = createAsyncThunk(
   "sections/deleteSection",
   async (id, thunkAPI) => {
     try {
-      const token = thunkAPI.getState().auth.token;
+      const token = localStorage.getItem("token");
       await axios.delete(`${API}${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -91,7 +87,6 @@ const sectionSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Sections
       .addCase(fetchSections.pending, (state) => {
         state.loading = true;
       })
@@ -104,8 +99,6 @@ const sectionSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Create Section
       .addCase(createSection.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
@@ -116,8 +109,6 @@ const sectionSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Update Section
       .addCase(updateSection.fulfilled, (state, action) => {
         const index = state.sections.findIndex((s) => s._id === action.payload._id);
         if (index !== -1) {
@@ -126,8 +117,6 @@ const sectionSlice = createSlice({
         state.success = true;
         state.error = null;
       })
-
-      // Delete Section
       .addCase(deleteSection.fulfilled, (state, action) => {
         state.sections = state.sections.filter((s) => s._id !== action.payload);
         state.error = null;

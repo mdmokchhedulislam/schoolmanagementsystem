@@ -1,7 +1,8 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import TeacherDashboard from "./TeacherDashboard";
+// import TeacherDashboard from "./TeacherDashboard";
 import AdminDashboard from "./AdminDashboard";
+import TeacherDashboard from "./TeacherDashboard";
 
 function Dashboard() {
   const { admin } = useSelector((state) => state.auth);

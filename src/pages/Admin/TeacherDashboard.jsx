@@ -1,264 +1,179 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { 
-  User, BookOpen, Clock, GraduationCap, 
-  ClipboardList, Mail, List, Layers, ShieldCheck,
-  CheckCircle2, AlertCircle
+  Calendar as CalendarIcon, 
+  Users, 
+  UserPlus, 
+  ClipboardCheck, 
+  BookOpen, 
+  ArrowRight,
+  MoreVertical
 } from "lucide-react";
-import { fetchAllStudents } from "../../redux/slices/studentSlice";
-import { fetchTeacherProfile } from "../../redux/slices/teacherSlice";
-import { fetchTeacherMyClasses } from "../../redux/slices/class_assainSlice"; 
+import { motion } from "framer-motion";
+
+// Actions
+import { getTeacherRoutine } from "../../redux/slices/routine_slice"; 
 
 const TeacherDashboard = () => {
   const dispatch = useDispatch();
-  
-  // Redux States
-  const { profile, loading } = useSelector((state) => state.teachers);
-  const { students } = useSelector((state) => state.students);
-  const { myClasses } = useSelector((state) => state.classAssain); 
-  console.log("class is", myClasses);
-  
+  const navigate = useNavigate();
+
+  const { teacherRoutine, loading } = useSelector((state) => state.routine);
+  const { profile } = useSelector((state) => state.teachers);
 
   useEffect(() => {
-    dispatch(fetchTeacherProfile());
-    dispatch(fetchAllStudents()); 
-    dispatch(fetchTeacherMyClasses());
+    dispatch(getTeacherRoutine());
   }, [dispatch]);
 
-  
-  const stats = [
-    { 
-      title: "My Assigned Classes", 
-      count: myClasses?.length || "0", 
-      icon: <BookOpen />, 
-      color: "bg-orange-500" 
-    },
-    { 
-      title: "Total Students", 
-      count: students?.length || "0", 
-      icon: <GraduationCap />, 
-      color: "bg-blue-500" 
-    },
-    { 
-      title: "Authorized Sections", 
-      count: myClasses ? [...new Set(myClasses.map(item => item.sectionName))].length : "0", 
-      icon: <Layers />, 
-      color: "bg-emerald-500" 
-    },
-  ];
-
-  if (loading && !profile) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen bg-[#f8fafc]">
-        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-indigo-600 font-black tracking-widest uppercase text-xs">Loading Dashboard...</p>
-      </div>
-    );
-  }
+  const today = new Date().toLocaleDateString('en-GB', { 
+    day: 'numeric', month: 'short', year: 'numeric' 
+  });
 
   return (
-    <div className="p-6 bg-[#f8fafc] min-h-screen font-sans text-slate-900">
-      {/* --- প্রোফাইল হেডার --- */}
-      <header className="mb-8">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-8"
-        >
-          <div className="relative">
-            <div className="h-28 w-28 rounded-3xl bg-indigo-600 flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-              <User size={56} />
+    <div className="p-6 bg-[#f4f7fe] min-h-screen font-sans">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* --- Top Profile Section --- */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-5">
+            <div className="relative">
+              <img 
+                src={profile?.image || "https://ui-avatars.com/api/?name=" + profile?.name} 
+                alt="Teacher" 
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-100"
+              />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-emerald-500 text-white p-1.5 rounded-xl border-4 border-white">
-              <CheckCircle2 size={16} />
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">Welcome, {profile?.name || "Teacher"}</h1>
+              <p className="text-sm text-slate-500 font-medium">{profile?.designation || "Senior Instructor"} • {profile?.department || "Academic"}</p>
             </div>
           </div>
           
-          <div className="text-center md:text-left flex-1">
-            <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-2">
-              Hello, {profile?.name || "Teacher"}!
-            </h1>
-            <div className="flex flex-wrap items-center gap-4 justify-center md:justify-start">
-              <p className="text-slate-500 font-bold flex items-center gap-2 text-sm">
-                <Mail size={16} className="text-indigo-400" /> {profile?.email}
-              </p>
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-300 hidden md:block"></span>
-              <p className="text-slate-500 font-bold text-sm uppercase tracking-wider">
-                Teacher ID: <span className="text-indigo-600">{profile?._id?.slice(-6)}</span>
-              </p>
-            </div>
-            <div className="mt-5">
-              <span className="px-5 py-2 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.15em] shadow-lg shadow-indigo-100 flex items-center w-fit gap-2 mx-auto md:mx-0">
-                <ShieldCheck size={14} /> Verified {profile?.role}
-              </span>
-            </div>
+          <div className="mt-4 md:mt-0 flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl">
+            <CalendarIcon size={18} className="text-indigo-600" />
+            <span className="text-sm font-bold text-slate-600">{today}</span>
           </div>
-        </motion.div>
-      </header>
+        </div>
 
-      {/* --- স্ট্যাটাস কার্ডস --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        {stats.map((item, idx) => (
-          <motion.div
-            key={idx}
-            whileHover={{ y: -8, transition: { duration: 0.2 } }}
-            className="bg-white p-7 rounded-[2rem] shadow-sm border border-slate-100 flex items-center gap-6"
-          >
-            <div className={`${item.color} p-5 rounded-[1.5rem] text-white shadow-2xl shadow-opacity-20`}>
-              {React.cloneElement(item.icon, { size: 28 })}
+        {/* --- Quick Action Grid --- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <QuickActionCard 
+            icon={<ClipboardCheck className="text-indigo-600" />} 
+            title="Add Attendance" 
+            desc="Mark today's presence"
+            onClick={() => navigate("/dashboard/teacher/atten")}
+            color="bg-indigo-50"
+          />
+          <QuickActionCard 
+            icon={<UserPlus className="text-emerald-600" />} 
+            title="Add Marks" 
+            desc="Input exam results"
+            onClick={() => {}} 
+            color="bg-emerald-50"
+          />
+          <QuickActionCard 
+            icon={<Users className="text-orange-600" />} 
+            title="My Students" 
+            desc="View student list"
+            onClick={() => {}} 
+            color="bg-orange-50"
+          />
+          <QuickActionCard 
+            icon={<BookOpen className="text-purple-600" />} 
+            title="Resources" 
+            desc="Upload study material"
+            onClick={() => {}} 
+            color="bg-purple-50"
+          />
+        </div>
+
+        {/* --- Bottom Content: Routine & Stats --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          
+          {/* Today's Classes */}
+          <div className="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-800">Today's Schedule</h3>
+              <button className="text-indigo-600 text-sm font-bold hover:underline">Full Routine</button>
             </div>
-            <div>
-              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.title}</p>
-              <h3 className="text-4xl font-black text-slate-800 tracking-tighter">{item.count}</h3>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8">
-        {/* --- মাই ক্লাস রুটিন (৩ কলাম) --- */}
-        <div className="lg:col-span-3 bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-3 uppercase tracking-tight">
-              <Layers className="text-orange-500" size={24} /> Authorized Classes
-            </h2>
-            <span className="text-[10px] font-black text-slate-400 bg-slate-50 px-3 py-1 rounded-full uppercase">
-              Current Session
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
-            {myClasses?.length > 0 ? (
-              myClasses.map((item, i) => (
-                <div key={i} className="group flex items-center p-6 bg-slate-50 rounded-[2rem] border border-slate-100 hover:bg-indigo-600 transition-all duration-300">
-                  <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center text-indigo-600 font-black text-xl shadow-sm group-hover:scale-90 transition-transform">
-                    {item.className?.charAt(0) || "C"}
-                  </div>
-                  <div className="ml-5 flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-black text-slate-800 group-hover:text-white text-lg transition-colors">{item.subjectName}</h4>
-                      <span className="px-2 py-0.5 bg-indigo-100 text-indigo-600 text-[8px] font-black rounded uppercase group-hover:bg-indigo-500 group-hover:text-white">
-                        {item.subjectType}
-                      </span>
+            
+            <div className="space-y-4">
+              {teacherRoutine?.length > 0 ? (
+                teacherRoutine.slice(0, 4).map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-indigo-200 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-white flex flex-col items-center justify-center shadow-sm text-indigo-600">
+                        <span className="text-xs font-black leading-none">{item.periodId?.periodNumber || idx+1}</span>
+                        <span className="text-[8px] uppercase font-bold text-slate-400 tracking-tighter">Period</span>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-800 text-sm group-hover:text-indigo-600 transition-colors">
+                          {item.subjectId?.name || "Regular Class"}
+                        </h4>
+                        <p className="text-xs text-slate-500 font-medium">
+                          Section: {item.sectionId?.name} • Room: {item.roomId?.roomNumber || "N/A"}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider group-hover:text-indigo-100">
-                      Class: {item.className} • Section: {item.sectionName}
-                    </p>
+                    <div className="text-right">
+                       <p className="text-xs font-bold text-slate-700">{item.periodId?.startTime || "09:00 AM"}</p>
+                       <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><MoreVertical size={16}/></button>
+                    </div>
                   </div>
-                  <div className="bg-white px-4 py-2 rounded-2xl shadow-sm text-center group-hover:bg-indigo-500 group-hover:border-transparent transition-all border border-slate-100">
-                    <p className="text-[10px] font-black text-slate-400 group-hover:text-white uppercase leading-none mb-1">Year</p>
-                    <p className="font-black text-slate-800 group-hover:text-white leading-none">{item.academicYear}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-20 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                <AlertCircle className="mx-auto text-slate-300 mb-3" size={40} />
-                <p className="text-slate-400 font-bold uppercase text-xs tracking-widest">No classes assigned to you yet.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 h-full">
-            <h2 className="text-xl font-black text-slate-800 flex items-center gap-3 mb-8 uppercase tracking-tight">
-              <ClipboardList className="text-indigo-600" size={24} /> Quick Management
-            </h2>
-            <div className="grid grid-cols-1 gap-4">
-              <button 
-                disabled={!myClasses || myClasses.length === 0}
-                className="flex items-center justify-between p-7 bg-indigo-600 text-white rounded-[2rem] font-black text-sm uppercase shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                <div className="text-left">
-                  <span>Mark Attendance</span>
-                  <p className="text-[10px] font-medium normal-case opacity-80">Only for your assigned classes</p>
-                </div>
-                <Clock size={24} className="group-hover:rotate-12 transition-transform" />
-              </button>
-
-              <button className="flex items-center justify-between p-7 bg-emerald-50 text-emerald-700 rounded-[2rem] font-black text-sm uppercase hover:bg-emerald-600 hover:text-white transition-all group">
-                Upload Exam Marks
-                <GraduationCap size={24} className="group-hover:-translate-y-1 transition-transform" />
-              </button>
-
-              <div className="p-6 bg-orange-50 rounded-[2rem] border border-orange-100">
-                <p className="text-orange-800 font-black text-[10px] uppercase tracking-widest mb-2 flex items-center gap-2">
-                  <AlertCircle size={14}/> Important Note
-                </p>
-                <p className="text-orange-700 text-xs font-medium leading-relaxed">
-                  Dadu, as the class teacher, you are responsible for student attendance and academic updates for the classes listed on the left.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* --- স্টুডেন্ট কন্টাক্ট লিস্ট --- */}
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-          <h2 className="text-2xl font-black text-slate-800 flex items-center gap-4 uppercase tracking-tight">
-            <List className="text-blue-600" size={28} /> Student Directory
-          </h2>
-          <div className="flex items-center bg-slate-50 p-2 rounded-2xl border border-slate-100">
-            <span className="px-5 py-2 bg-white shadow-sm text-blue-600 rounded-xl text-xs font-black uppercase tracking-widest">
-              {students?.length || 0} Total Students
-            </span>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-slate-400 text-[10px] uppercase font-black tracking-[0.2em] border-b border-slate-100">
-                <th className="pb-6 pl-4">Full Name</th>
-                <th className="pb-6">Email Address</th>
-                <th className="pb-6">Status</th>
-                <th className="pb-6 text-right pr-6">Management</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {students?.length > 0 ? (
-                students.map((student, idx) => (
-                  <tr key={idx} className="group hover:bg-slate-50/80 transition-all">
-                    <td className="py-6 pl-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-11 w-11 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-sm text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
-                          {student.name?.charAt(0)}
-                        </div>
-                        <span className="font-black text-slate-700 text-base">{student.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-6 text-slate-500 text-sm font-bold tracking-tight">
-                      {student.email || <span className="text-slate-300 italic font-normal">not-assigned</span>}
-                    </td>
-                    <td className="py-6">
-                      <div className="flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Active</span>
-                      </div>
-                    </td>
-                    <td className="py-6 text-right pr-6">
-                      <button className="px-5 py-2 bg-white border border-slate-200 text-indigo-600 font-black text-[10px] uppercase tracking-widest rounded-xl hover:bg-indigo-600 hover:text-white hover:border-transparent transition-all">
-                        View Profile
-                      </button>
-                    </td>
-                  </tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan="4" className="py-10 text-center text-slate-400 font-bold italic uppercase text-xs">No student data found.</td>
-                </tr>
+                <div className="text-center py-10 border-2 border-dashed border-slate-100 rounded-2xl">
+                  <p className="text-sm text-slate-400 font-medium">No classes scheduled for today.</p>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          </div>
+
+          {/* Quick Stats/Notice */}
+          <div className="space-y-6">
+            <div className="bg-indigo-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-100 relative overflow-hidden">
+               <div className="relative z-10">
+                 <p className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Attendance Rate</p>
+                 <h2 className="text-4xl font-black mb-4">92%</h2>
+                 <p className="text-xs text-indigo-100 leading-relaxed">Overall student presence for your classes this month.</p>
+               </div>
+               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
+              <h3 className="text-md font-bold text-slate-800 mb-4">Quick Notice</h3>
+              <div className="p-4 rounded-2xl bg-orange-50 border border-orange-100">
+                 <p className="text-xs text-orange-700 font-bold leading-relaxed">
+                   Faculty meeting at 02:00 PM in the Conference Hall. All teachers must attend.
+                 </p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
   );
 };
+
+// --- Sub Component for Quick Actions ---
+const QuickActionCard = ({ icon, title, desc, onClick, color }) => (
+  <motion.div 
+    whileHover={{ y: -3 }}
+    onClick={onClick}
+    className="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all group"
+  >
+    <div className={`w-12 h-12 rounded-2xl ${color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+      {icon}
+    </div>
+    <div className="overflow-hidden">
+      <h3 className="font-bold text-slate-800 text-sm tracking-tight">{title}</h3>
+      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest truncate">{desc}</p>
+    </div>
+    <ArrowRight size={14} className="ml-auto text-slate-300 group-hover:text-indigo-600 transition-colors" />
+  </motion.div>
+);
 
 export default TeacherDashboard;

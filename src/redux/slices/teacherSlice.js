@@ -129,7 +129,7 @@ const teacherSlice = createSlice({
       .addCase(loginTeacher.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
-        state.profile = { name: action.payload.name };
+        state.profile = action.payload.data || action.payload.teacher;
       })
       .addCase(loginTeacher.rejected, (state, action) => {
         state.loading = false;

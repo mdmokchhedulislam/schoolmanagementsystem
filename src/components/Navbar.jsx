@@ -25,14 +25,14 @@ function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Redux থেকে সব ধরনের ইউজার ডাটা আনা
+
   const { token: adminToken, admin, isAuthenticated: isAdminAuth } = useSelector((state) => state.auth);
   const { student, token: studentToken, isAuthenticated: isStudentAuth } = useSelector((state) => state.student);
-  // (ভবিষ্যতে Teacher এর জন্য এখানে আনতে পারবে)
+
   
   const { school } = useSelector((state) => state.school);
 
-  // চেক করা হচ্ছে বর্তমানে কে লগইন করা
+
   const isAuthenticated = isAdminAuth || isStudentAuth;
   const userType = isAdminAuth ? "admin" : isStudentAuth ? "student" : null;
   const currentUser = isAdminAuth ? admin : student;
@@ -90,7 +90,7 @@ function Navbar() {
                 onClick={() => setDropdown(!dropdown)}
                 className="flex items-center gap-2 px-2 py-1.5 rounded-xl bg-blue-50/50 dark:bg-slate-800/50 border border-blue-100 dark:border-slate-700 hover:shadow-sm transition-all active:scale-95"
               >
-                {/* Admin এর জন্য স্কুলের নাম ও আইকন, অন্যদের জন্য ইমেজ */}
+              
                 {userType === "admin" ? (
                   <>
                     <div className="bg-blue-600 p-1.5 rounded-lg text-white">
