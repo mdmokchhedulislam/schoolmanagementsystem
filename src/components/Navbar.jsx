@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/slices/authSlice"; // Admin logout
-import { logoutStudent } from "../redux/slices/student/studentSlice"; // Student logout
+import { logout } from "../redux/slices/authSlice"; // Admin
+import { logoutStudent } from "../redux/slices/student/studentSlice"; // Student
+import { logoutTeacher } from "../redux/slices/teacherSlice"; // Teacher (নতুন যোগ করা হয়েছে)
 import { fetchSchoolProfile } from "../redux/slices/schoolSlice";
 import { 
   User, 
@@ -17,7 +18,6 @@ import {
 } from "lucide-react";
 
 function Navbar() {
-  const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
   const [dropdown, setDropdown] = useState(false);
   const dropdownRef = useRef(null);
@@ -25,27 +25,33 @@ function Navbar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-
-  const { token: adminToken, admin, isAuthenticated: isAdminAuth } = useSelector((state) => state.auth);
-  const { student, token: studentToken, isAuthenticated: isStudentAuth } = useSelector((state) => state.student);
-
-  
+  // Redux States
+  const { admin, isAuthenticated: isAdminAuth, token: adminToken } = useSelector((state) => state.auth);
+  const { student, isAuthenticated: isStudentAuth } = useSelector((state) => state.student);
+  const { profile: teacher, isAuthenticated: isTeacherAuth } = useSelector((state) => state.teachers);
   const { school } = useSelector((state) => state.school);
 
+  // Derived Auth Logic
+  const isAuthenticated = isAdminAuth || isStudentAuth || isTeacherAuth;
+  
+  let userType = null;
+  if (isAdminAuth) userType = "admin";
+  else if (isStudentAuth) userType = "student";
+  else if (isTeacherAuth) userType = "teacher";
 
-  const isAuthenticated = isAdminAuth || isStudentAuth;
-  const userType = isAdminAuth ? "admin" : isStudentAuth ? "student" : null;
-  const currentUser = isAdminAuth ? admin : student;
+  const currentUser = isAdminAuth ? admin : (isStudentAuth ? student : teacher);
 
   useEffect(() => {
     if (adminToken) dispatch(fetchSchoolProfile());
   }, [adminToken, dispatch]);
 
+  // Dark Mode Toggle
   useEffect(() => {
     if (dark) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
   }, [dark]);
 
+  // Dropdown Close on Outside Click
   useEffect(() => {
     const handler = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -59,11 +65,20 @@ function Navbar() {
   const handleLogout = () => {
     if (userType === "admin") {
       dispatch(logout());
-    } else {
+    } else if (userType === "student") {
       dispatch(logoutStudent());
+    } else if (userType === "teacher") {
+      dispatch(logoutTeacher());
     }
     setDropdown(false);
     navigate("/");
+  };
+
+  // ড্যাশবোর্ড এবং প্রোফাইল লিঙ্ক নির্ধারণ
+  const getDashboardLink = () => {
+    if (userType === "admin") return "/admin/dashboard";
+    if (userType === "teacher") return "/teacher/dashboard";
+    return "/student/profile";
   };
 
   return (
@@ -137,20 +152,20 @@ function Navbar() {
                       Logged in as {userType}
                     </p>
                     <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
-                      {userType === "admin" ? (admin?.name || "School Admin") : student?.name}
+                      {userType === "admin" ? (admin?.name || "School Admin") : currentUser?.name}
                     </p>
                   </div>
 
                   <div className="px-2 space-y-1">
                     <Link 
-                      to={userType === "admin" ? "/admin/dashboard" : "/student/profile"} 
+                      to={getDashboardLink()} 
                       onClick={() => setDropdown(false)} 
                       className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 rounded-lg transition-colors"
                     >
                       <LayoutDashboard size={18} /> Dashboard
                     </Link>
                     <Link 
-                      to={userType === "admin" ? "/profile" : "/student/profile"} 
+                      to={userType === "admin" ? "/profile" : (userType === "teacher" ? "/teacher/profile" : "/student/profile")} 
                       onClick={() => setDropdown(false)} 
                       className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 rounded-lg transition-colors"
                     >

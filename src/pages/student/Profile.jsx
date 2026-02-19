@@ -3,196 +3,114 @@ import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyProfile } from "../../redux/slices/student/studentSlice";
 import { getMyPaymentHistory } from "../../redux/slices/payment_slice";
-import { 
-  BookOpen, Calendar, FileText, ShieldCheck, 
-  User as UserIcon, GraduationCap, CreditCard, 
-  CheckCircle2, Clock, AlertCircle, Download
+import { getStudentOwnResult } from "../../redux/slices/result_slice"; 
+import { getStudentRoutine } from "../../redux/slices/routine_slice"; 
+import {
+  BookOpen, Calendar, FileText, ShieldCheck,
+  User as UserIcon, GraduationCap, CreditCard,
+  Download, Mail, Phone, ArrowLeft, Zap, Star, AlertCircle
 } from "lucide-react";
 
 function StudentProfile() {
   const dispatch = useDispatch();
-  const [showPayments, setShowPayments] = useState(false); // Payment toggle state
-  
-  const { student, loading, error } = useSelector((state) => state.student);
+  const [view, setView] = useState("profile"); 
+
+  const { student, loading } = useSelector((state) => state.student);
   const { payments, loading: paymentLoading } = useSelector((state) => state.payment);
+  
+
+  const { marks = [], loading: resultLoading } = useSelector((state) => state.marks || {});
+  
+  const { studentRoutine, loading: routineLoading } = useSelector((state) => state.routine || {});
+  console.log("studentRoutine", studentRoutine);
+  
 
   useEffect(() => {
-    if (!student) {
-      dispatch(getMyProfile());
-    }
+    if (!student) dispatch(getMyProfile());
   }, [dispatch, student]);
 
-  // Payment Fetch Logic
   const handlePaymentClick = () => {
-    setShowPayments(true);
+    setView("payments");
     dispatch(getMyPaymentHistory());
   };
 
+  const handleResultClick = () => {
+    setView("results");
+    if (!marks || marks.length === 0) {
+      dispatch(getStudentOwnResult("LATEST_EXAM_ID")); 
+    }
+  };
+
+  const handleRoutineClick = () => {
+    setView("routine");
+    dispatch(getStudentRoutine());
+  };
+
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="animate-pulse font-bold tracking-widest text-indigo-400 uppercase">Loading Student Data...</p>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen flex items-center justify-center bg-[#020617]"><Zap className="text-indigo-500 animate-pulse" size={48} /></div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] py-8 px-4 sm:px-6 lg:px-8 font-sans text-white relative">
-      {/* Background Glows */}
-      <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-purple-600/10 blur-[100px] rounded-full" />
-        <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-indigo-600/10 blur-[100px] rounded-full" />
-      </div>
-
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header Profile Card */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col md:flex-row items-center gap-8"
-        >
-          <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-            <img 
-              src={student?.image || "https://via.placeholder.com/150"} 
-              alt={student?.name} 
-              className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-[1.8rem] object-cover border-2 border-white/10 shadow-2xl bg-slate-800"
-            />
-            <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-6 h-6 rounded-full border-4 border-[#0f172a] shadow-lg"></div>
-          </div>
-          
-          <div className="text-center md:text-left flex-1">
-            <p className="text-indigo-400 text-[10px] font-black tracking-[0.3em] uppercase mb-2">Student Identity</p>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-3 uppercase leading-none">{student?.name}</h1>
-            <div className="flex flex-wrap justify-center md:justify-start gap-3">
-              <span className="flex items-center gap-2 px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-bold tracking-widest uppercase border border-white/10">
-                <GraduationCap size={14}/> ID: {student?._id?.slice(-6)}
-              </span>
-              <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 rounded-full text-[10px] font-bold tracking-widest uppercase border border-emerald-500/10">
-                {student?.status || "Active"}
-              </span>
+    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans pb-20 overflow-hidden">
+      <div className="max-w-6xl mx-auto px-4 pt-10 space-y-10">
+        
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden bg-white/[0.03] backdrop-blur-2xl rounded-[3rem] border border-white/10 p-8 shadow-2xl">
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            <img src={student?.image || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} className="w-40 h-40 rounded-[2rem] object-cover border-4 border-white/10 bg-slate-900" alt="Profile" />
+            <div className="text-center md:text-left">
+              <h1 className="text-4xl md:text-6xl font-black text-white uppercase">{student?.name}</h1>
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
+                <Badge icon={<Mail size={12} />} text={student?.email} />
+                <Badge icon={<Zap size={12} />} text={`ID: ${student?._id?.slice(-6)}`} color="bg-purple-500/10 text-purple-400" />
+              </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Navigation Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <ActionCard icon={<BookOpen size={20}/>} title="Results" color="from-blue-600 to-cyan-500" />
-          <ActionCard icon={<Calendar size={20}/>} title="Routine" color="from-purple-600 to-pink-500" />
-          <ActionCard icon={<FileText size={20}/>} title="Marksheet" color="from-orange-600 to-yellow-500" />
-          <ActionCard 
-            icon={<CreditCard size={20}/>} 
-            title="Payments" 
-            color="from-emerald-600 to-teal-500" 
-            onClick={handlePaymentClick}
-          />
+        {/* NAV GRID */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <NavCard icon={<BookOpen />} label="Results" sub="Grade Sheet" color="from-blue-500 to-indigo-600" onClick={handleResultClick} active={view === "results"} />
+          <NavCard icon={<Calendar />} label="Routine" sub="Class Time" color="from-violet-500 to-purple-600" onClick={handleRoutineClick} active={view === "routine"} />
+          <NavCard icon={<FileText />} label="Archive" sub="Documents" color="from-fuchsia-500 to-pink-600" />
+          <NavCard icon={<CreditCard />} label="Payments" sub="Billing" color="from-emerald-500 to-teal-600" onClick={handlePaymentClick} active={view === "payments"} />
         </div>
 
-        {/* Conditionally Show Payment History or Student Details */}
+        {/* CONTENT */}
         <AnimatePresence mode="wait">
-          {!showPayments ? (
-            <motion.div 
-              key="details"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
-            >
-               {/* Academic, Contact, Address Cards (Your existing code) */}
-               <div className="space-y-8">
-                <InfoCard title="Academic Details" icon={<GraduationCap size={18}/>} color="text-indigo-400">
-                  <InfoRow label="Class" value={student?.classId?.className} />
-                  <InfoRow label="Section" value={student?.sectionId?.sectionName} />
-                  <InfoRow label="Roll No" value={student?.rollNo} />
-                  <InfoRow label="Session" value={student?.academicYearId?.year} />
-                </InfoCard>
-               </div>
-               <div className="space-y-8">
-                <InfoCard title="Contact Info" icon={<UserIcon size={18}/>} color="text-purple-400">
-                  <InfoRow label="Email" value={student?.email} />
-                  <InfoRow label="Phone" value={student?.phone} />
-                </InfoCard>
-               </div>
-               <div className="space-y-8">
-                <InfoCard title="Guardian Info" icon={<ShieldCheck size={18}/>} color="text-orange-400">
-                  <InfoRow label="Guardian" value={student?.guardianName} />
-                  <InfoRow label="Contact" value={student?.guardianContact} />
-                </InfoCard>
-               </div>
+          {view === "profile" && (
+            <motion.div key="profile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <DataCard title="Academic" icon={<GraduationCap className="text-indigo-400" />}>
+                <DataRow label="Class" value={student?.classId?.className} />
+                <DataRow label="Roll No" value={student?.rollNo} />
+                <DataRow label="Section" value={student?.sectionId?.sectionName} />
+              </DataCard>
+              <DataCard title="Communication" icon={<Phone className="text-purple-400" />}>
+                <DataRow label="Phone" value={student?.phone} />
+                <DataRow label="Guardian" value={student?.guardianName} />
+              </DataCard>
+              <DataCard title="Status" icon={<ShieldCheck className="text-emerald-400" />}>
+                <DataRow label="Status" value="Active Student" />
+                <DataRow label="Admission" value="2025-26" />
+              </DataCard>
             </motion.div>
-          ) : (
-            <motion.div 
-              key="payments"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="bg-white/5 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/10 shadow-2xl"
-            >
-              <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h2 className="text-2xl font-black uppercase tracking-tight">Payment History</h2>
-                  <p className="text-indigo-400 text-[10px] font-bold tracking-widest uppercase">Manage your transactions</p>
-                </div>
-                <button 
-                  onClick={() => setShowPayments(false)}
-                  className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-[10px] font-black uppercase transition-all"
-                >
-                  Back to Profile
-                </button>
-              </div>
+          )}
 
-              {paymentLoading ? (
-                <div className="py-20 text-center animate-pulse text-indigo-400 font-bold uppercase tracking-widest">
-                  Fetching Records...
-                </div>
-              ) : payments.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="text-gray-500 text-[10px] font-black uppercase tracking-widest border-b border-white/10">
-                        <th className="pb-4 px-4">Receipt</th>
-                        <th className="pb-4 px-4">Date</th>
-                        <th className="pb-4 px-4">Amount</th>
-                        <th className="pb-4 px-4">Status</th>
-                        <th className="pb-4 px-4">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {payments.map((pay, idx) => (
-                        <tr key={idx} className="group hover:bg-white/5 transition-all">
-                          <td className="py-5 px-4">
-                            <p className="text-sm font-bold text-gray-200 uppercase">#{pay._id?.slice(-8)}</p>
-                            <p className="text-[9px] text-gray-500 uppercase">{pay.paymentType || "Manual"}</p>
-                          </td>
-                          <td className="py-5 px-4 text-xs font-medium text-gray-400">
-                            {new Date(pay.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="py-5 px-4">
-                            <span className="text-sm font-black text-indigo-400">{pay.amount} BDT</span>
-                          </td>
-                          <td className="py-5 px-4">
-                            <StatusBadge status={pay.status} />
-                          </td>
-                          <td className="py-5 px-4">
-                            <button className="p-2 bg-white/5 hover:bg-indigo-600 rounded-lg transition-all">
-                              <Download size={14} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="py-20 text-center flex flex-col items-center gap-4">
-                  <AlertCircle size={40} className="text-gray-600" />
-                  <p className="text-gray-500 font-bold uppercase tracking-widest">No payment records found</p>
-                </div>
-              )}
-            </motion.div>
+          {view === "results" && (
+            <ContentWrapper title="Academic Results" onClose={() => setView("profile")} icon={<Star className="text-yellow-400" />}>
+               {resultLoading ? <Loader /> : <ResultTable results={marks} />}
+            </ContentWrapper>
+          )}
+
+          {view === "routine" && (
+            <ContentWrapper title="Class Routine" onClose={() => setView("profile")} icon={<Calendar className="text-violet-400" />}>
+               {routineLoading ? <Loader /> : <RoutineTable routines={studentRoutine} />}
+            </ContentWrapper>
+          )}
+
+          {view === "payments" && (
+            <ContentWrapper title="Payment History" onClose={() => setView("profile")} icon={<CreditCard className="text-emerald-400" />}>
+               {paymentLoading ? <Loader /> : <PaymentTable payments={payments} />}
+            </ContentWrapper>
           )}
         </AnimatePresence>
       </div>
@@ -200,69 +118,118 @@ function StudentProfile() {
   );
 }
 
-// Helper Components
-function StatusBadge({ status }) {
-  const isPaid = status === 'paid' || status === 'completed' || status === 'Approved';
-  const isPending = status === 'pending';
+// --- TABLE COMPONENTS ---
 
-  return (
-    <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-      isPaid ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-      isPending ? "bg-amber-500/10 text-amber-400 border-amber-500/20" :
-      "bg-red-500/10 text-red-400 border-red-500/20"
-    }`}>
-      {isPaid ? <CheckCircle2 size={10}/> : isPending ? <Clock size={10}/> : <AlertCircle size={10}/>}
-      {status}
-    </span>
-  );
-}
+const ResultTable = ({ results }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead>
+        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+          <th className="pb-4 text-left px-4">Subject</th>
+          <th className="pb-4 text-center px-4">Total</th>
+          <th className="pb-4 text-right px-4">Grade</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/[0.02]">
+        {results?.length > 0 ? results.map((res, i) => (
+          <tr key={i} className="hover:bg-white/[0.02]">
+            <td className="py-5 px-4 font-bold text-slate-200">{res.subjectId?.name}</td>
+            <td className="py-5 px-4 text-center font-black text-indigo-400">{res.totalMarks}</td>
+            <td className="py-5 px-4 text-right">
+              <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg font-black">{res.grade}</span>
+            </td>
+          </tr>
+        )) : <tr><td colSpan="3" className="py-10 text-center opacity-50">No results found.</td></tr>}
+      </tbody>
+    </table>
+  </div>
+);
 
-function ActionCard({ icon, title, color, onClick }) {
-  return (
-    <motion.div 
-      whileHover={{ y: -5, scale: 1.02 }}
-      onClick={onClick}
-      className="bg-white/5 border border-white/10 p-4 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/10 transition-all group"
-    >
-      <div className={`p-3 rounded-xl bg-gradient-to-br ${color} shadow-lg transition-transform group-hover:rotate-12`}>
-        {icon}
-      </div>
-      <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">{title}</span>
-    </motion.div>
-  );
-}
+const RoutineTable = ({ routines }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead>
+        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+          <th className="pb-4 text-left px-4">Day</th>
+          <th className="pb-4 text-left px-4">Subject</th>
+          <th className="pb-4 text-left px-4">Time</th>
+          <th className="pb-4 text-right px-4">Room</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/[0.02]">
+        {routines?.length > 0 ? routines.map((item, i) => (
+          <tr key={i} className="hover:bg-white/[0.02]">
+            <td className="py-5 px-4 font-bold text-indigo-400 uppercase">{item.day}</td>
+            <td className="py-5 px-4 text-slate-200 font-semibold">{item.subjectId?.name}</td>
+            <td className="py-5 px-4 text-slate-400">{item.startTime} - {item.endTime}</td>
+            <td className="py-5 px-4 text-right text-emerald-400 font-bold">{item.roomNo || "N/A"}</td>
+          </tr>
+        )) : <tr><td colSpan="4" className="py-10 text-center opacity-50">Routine not available.</td></tr>}
+      </tbody>
+    </table>
+  </div>
+);
 
-function InfoCard({ title, children, color, icon }) {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="bg-white/5 backdrop-blur-lg rounded-[2.2rem] p-7 border border-white/10 shadow-xl"
-    >
-      <div className="flex items-center gap-3 mb-6">
-        <div className={`${color} opacity-80`}>{icon}</div>
-        <h3 className={`text-[12px] font-black uppercase tracking-[0.2em] ${color}`}>{title}</h3>
-      </div>
-      <div className="space-y-4">{children}</div>
-    </motion.div>
-  );
-}
+const PaymentTable = ({ payments }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead>
+        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+          <th className="pb-4 text-left px-4">Date</th>
+          <th className="pb-4 text-left px-4">Amount</th>
+          <th className="pb-4 text-right px-4">Status</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/[0.02]">
+        {payments?.map((pay, i) => (
+          <tr key={i}>
+            <td className="py-5 px-4 text-slate-400 text-xs">{new Date(pay.createdAt).toLocaleDateString()}</td>
+            <td className="py-5 px-4 font-black text-indigo-400">{pay.amount} BDT</td>
+            <td className="py-5 px-4 text-right uppercase text-[10px] font-bold">{pay.status}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
-function InfoRow({ label, value }) {
-  const displayValue = (val) => {
-    if (!val) return "N/A";
-    if (typeof val === "object") return val.className || val.sectionName || val.year || "N/A";
-    return val;
-  };
-
-  return (
-    <div className="flex justify-between items-center group">
-      <span className="text-gray-500 text-[9px] uppercase font-black tracking-tighter">{label}</span>
-      <span className="text-gray-200 font-bold text-xs truncate max-w-[150px]">
-        {displayValue(value)}
-      </span>
+// --- HELPERS ---
+const ContentWrapper = ({ title, icon, children, onClose }) => (
+  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white/[0.03] border border-white/10 rounded-[3rem] p-8 backdrop-blur-xl">
+    <div className="flex justify-between items-center mb-10">
+      <h2 className="text-3xl font-black text-white uppercase flex items-center gap-3">{icon} {title}</h2>
+      <button onClick={onClose} className="px-6 py-2 bg-white/5 rounded-2xl text-xs font-bold border border-white/10 flex items-center gap-2"><ArrowLeft size={14}/> Back</button>
     </div>
-  );
-}
+    {children}
+  </motion.div>
+);
+
+const Badge = ({ icon, text, color = "bg-indigo-500/10 text-indigo-400" }) => (
+  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/5 text-[11px] font-bold ${color}`}>{icon} {text}</div>
+);
+
+const NavCard = ({ icon, label, sub, color, onClick, active }) => (
+  <button onClick={onClick} className={`p-6 rounded-[2rem] border transition-all text-left ${active ? 'bg-indigo-500/10 border-indigo-500/40' : 'bg-white/[0.03] border-white/5 hover:border-white/10'}`}>
+    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white mb-4`}>{icon}</div>
+    <h4 className="text-white font-black uppercase text-xs">{label}</h4>
+    <p className="text-slate-500 text-[10px]">{sub}</p>
+  </button>
+);
+
+const DataCard = ({ title, icon, children }) => (
+  <div className="bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-8">
+    <div className="flex items-center gap-3 mb-8">{icon}<h3 className="text-xs font-black uppercase text-slate-400">{title}</h3></div>
+    <div className="space-y-5">{children}</div>
+  </div>
+);
+
+const DataRow = ({ label, value }) => (
+  <div className="flex flex-col gap-1">
+    <span className="text-[9px] font-black uppercase text-slate-500">{label}</span>
+    <span className="text-sm font-bold text-slate-200">{value || "N/A"}</span>
+  </div>
+);
+
+const Loader = () => <div className="h-64 flex items-center justify-center"><div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
 export default StudentProfile;
