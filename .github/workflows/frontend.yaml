@@ -3,7 +3,7 @@ name: Build and Push to DockerHub
 on:
   push:
     branches:
-      - main  # Main branch-e push holei trigger hobe
+      - main 
 
 jobs:
   build-and-push:

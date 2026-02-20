@@ -3,14 +3,14 @@ import axios from "axios";
 
 const API = "http://localhost:5000/api/v1/students/";
 
-// টোকেন পাওয়ার জন্য একটি হেল্পার ফাংশন (যাতে বার বার কোড লিখতে না হয়)
+
 const getAuthHeaders = (thunkAPI) => {
-  // ১. প্রথমে স্টেট থেকে চেক করুন
+
   let token = thunkAPI.getState().auth?.token;
   
-  // ২. যদি স্টেটে না থাকে, তবে লোকাল স্টোরেজ থেকে নিন
+
   if (!token) {
-    token = localStorage.getItem("token"); // আপনার প্রোজেক্টে যে নামে সেভ করেছেন
+    token = localStorage.getItem("token"); 
   }
   
   return { headers: { Authorization: `Bearer ${token}` } };
@@ -23,7 +23,7 @@ export const fetchAllStudents = createAsyncThunk(
     try {
       const config = getAuthHeaders(thunkAPI);
       
-      // কনসোল চেক করুন টোকেন ঠিকমতো পাচ্ছে কি না
+   
       console.log("Requesting with token:", config.headers.Authorization);
 
       const res = await axios.get(`${API}`, config);
@@ -34,7 +34,7 @@ export const fetchAllStudents = createAsyncThunk(
   }
 );
 
-// ২. Add Student (ইমেইল ফিল্ড সহ)
+
 export const addStudent = createAsyncThunk(
   "students/addStudent",
   async (studentData, thunkAPI) => {

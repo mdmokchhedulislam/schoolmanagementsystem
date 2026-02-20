@@ -3,26 +3,22 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api/v1/students'; 
 
-// Login Thunk (Student Phone ar Password diye login korbe)
 export const loginStudent = createAsyncThunk(
     'student/login',
     async (credentials, { rejectWithValue }) => {
         try {
-            // credentials = { phone, password }
             const response = await axios.post(`${API_URL}/login`, credentials);
             
-            // Token ar Role save rakhi
             localStorage.setItem('token', response.data.token); 
             localStorage.setItem('userRole', 'student'); 
             
-            return response.data; // Eikhane { success, token, data: studentObj } thake
+            return response.data; 
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Login failed');
         }
     }
 );
 
-// Profile Thunk
 export const getMyProfile = createAsyncThunk(
     'student/getProfile',
     async (_, { rejectWithValue }) => {
@@ -47,7 +43,7 @@ const initialState = {
 };
 
 const studentSlice = createSlice({
-    name: 'student', // Eita 'student' e thakbe jate useSelector-e state.student pawa jay
+    name: 'student',
     initialState,
     reducers: {
         logoutStudent: (state) => {
@@ -63,7 +59,7 @@ const studentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Login Handlers
+           
             .addCase(loginStudent.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -71,7 +67,6 @@ const studentSlice = createSlice({
             .addCase(loginStudent.fulfilled, (state, action) => {
                 state.loading = false;
                 state.token = action.payload.token;
-                // Backend theke jodi action.payload.data-te student details thake:
                 state.student = action.payload.data; 
                 state.isAuthenticated = true;
             })
@@ -80,19 +75,17 @@ const studentSlice = createSlice({
                 state.error = action.payload;
             })
 
-            // Profile Handlers
             .addCase(getMyProfile.pending, (state) => {
                 state.loading = true;
             })
             .addCase(getMyProfile.fulfilled, (state, action) => {
                 state.loading = false;
-                state.student = action.payload; // Direct student object
+                state.student = action.payload; 
                 state.isAuthenticated = true;
             })
             .addCase(getMyProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
-                // Token expire hole clean up
                 if (action.payload === "jwt expired" || action.payload === "Please login first") {
                     state.isAuthenticated = false;
                     localStorage.removeItem('token');
