@@ -5,9 +5,11 @@ import { getMyProfile } from "../../redux/slices/student/studentSlice";
 import { getMyPaymentHistory } from "../../redux/slices/payment_slice";
 import { getStudentOwnResult } from "../../redux/slices/result_slice"; 
 import { getStudentRoutine } from "../../redux/slices/routine_slice"; 
+import { getStudentDashboardExams } from "../../redux/slices/examSlice"; 
+
 import {
-  BookOpen, Calendar, FileText, ShieldCheck,
-  Zap, Star, Mail, Phone, ArrowLeft, GraduationCap, CreditCard, Clock
+  BookOpen, Calendar, ShieldCheck,
+  Zap, Star, Mail, Phone, ArrowLeft, GraduationCap, CreditCard, Clock, ClipboardList
 } from "lucide-react";
 
 function StudentProfile() {
@@ -19,6 +21,7 @@ function StudentProfile() {
   const { payments, loading: paymentLoading } = useSelector((state) => state.payment);
   const { marks = [], loading: resultLoading } = useSelector((state) => state.marks || {});
   const { studentRoutine, loading: routineLoading } = useSelector((state) => state.routine || {});
+  const { exams = [], loading: examLoading } = useSelector((state) => state.exams || {});
 
   useEffect(() => {
     if (!student) dispatch(getMyProfile());
@@ -42,6 +45,11 @@ function StudentProfile() {
     setView("routine");
     setShowFullWeek(false);
     dispatch(getStudentRoutine());
+  };
+
+  const handleExamClick = () => {
+    setView("exams");
+    dispatch(getStudentDashboardExams());
   };
 
   if (loading) {
@@ -68,7 +76,7 @@ function StudentProfile() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           <NavCard icon={<BookOpen />} label="Results" sub="Grade Sheet" color="from-blue-500 to-indigo-600" onClick={handleResultClick} active={view === "results"} />
           <NavCard icon={<Calendar />} label="Routine" sub="Class Time" color="from-violet-500 to-purple-600" onClick={handleRoutineClick} active={view === "routine"} />
-          <NavCard icon={<FileText />} label="Archive" sub="Documents" color="from-fuchsia-500 to-pink-600" />
+          <NavCard icon={<ClipboardList />} label="Exams" sub="Schedules" color="from-fuchsia-500 to-pink-600" onClick={handleExamClick} active={view === "exams"} />
           <NavCard icon={<CreditCard />} label="Payments" sub="Billing" color="from-emerald-500 to-teal-600" onClick={handlePaymentClick} active={view === "payments"} />
         </div>
 
@@ -89,6 +97,12 @@ function StudentProfile() {
                 <DataRow label="Admission" value="2025-26" />
               </DataCard>
             </motion.div>
+          )}
+
+          {view === "exams" && (
+            <ContentWrapper title="Exam Schedule" onClose={() => setView("profile")} icon={<ClipboardList className="text-pink-400" />}>
+                {examLoading ? <Loader /> : <ExamTable exams={exams} />}
+            </ContentWrapper>
           )}
 
           {view === "results" && (
@@ -112,11 +126,7 @@ function StudentProfile() {
               }
             >
                 {routineLoading ? <Loader /> : (
-                  <RoutineView 
-                    routines={studentRoutine} 
-                    todayName={todayName} 
-                    showFullWeek={showFullWeek} 
-                  />
+                  <RoutineView routines={studentRoutine} todayName={todayName} showFullWeek={showFullWeek} />
                 )}
             </ContentWrapper>
           )}
@@ -131,6 +141,61 @@ function StudentProfile() {
     </div>
   );
 }
+
+const ExamTable = ({ exams }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full">
+      <thead>
+        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
+          <th className="pb-4 text-left px-4">Subject & Category</th>
+          <th className="pb-4 text-center px-4">Date</th>
+          <th className="pb-4 text-center px-4">Room</th>
+          <th className="pb-4 text-right px-4">Time</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-white/[0.02]">
+        {exams?.length > 0 ? exams.map((exam, i) => (
+          <tr key={i} className="hover:bg-white/[0.02] transition-colors group">
+            <td className="py-5 px-4">
+              <div className="font-bold text-slate-200 group-hover:text-pink-400 transition-colors">{exam.subjectId?.name}</div>
+              <div className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">
+                {exam.categoryId?.name || "General Exam"}
+              </div>
+            </td>
+            <td className="py-5 px-4 text-center">
+              <div className="text-sm font-bold text-slate-300">
+                {new Date(exam.examDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+              </div>
+              <div className="text-[9px] text-slate-500 uppercase">{new Date(exam.examDate).toLocaleDateString('en-US', { weekday: 'short' })}</div>
+            </td>
+            <td className="py-5 px-4 text-center">
+                <span className="text-xs font-medium text-slate-400 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                    {exam.roomNumber || "N/A"}
+                </span>
+            </td>
+            <td className="py-5 px-4 text-right">
+              <div className="flex flex-col items-end">
+                <span className="px-3 py-1 bg-pink-500/10 text-pink-400 rounded-lg font-black text-[11px] border border-pink-500/20">
+                  {exam.startTime}
+                </span>
+                <span className="text-[9px] text-slate-600 mt-1 uppercase font-bold">Ends: {exam.endTime}</span>
+              </div>
+            </td>
+          </tr>
+        )) : (
+          <tr>
+            <td colSpan="4" className="py-20 text-center">
+               <div className="flex flex-col items-center gap-2 opacity-30">
+                  <ClipboardList size={40} />
+                  <p className="text-xs font-black uppercase tracking-widest">No Exams Found</p>
+               </div>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+);
 
 const RoutineView = ({ routines, todayName, showFullWeek }) => {
   const filtered = showFullWeek 
