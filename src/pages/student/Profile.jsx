@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { getMyProfile } from "../../redux/slices/student/studentSlice";
@@ -9,13 +9,14 @@ import { getStudentDashboardExams } from "../../redux/slices/examSlice";
 
 import {
   BookOpen, Calendar, ShieldCheck,
-  Zap, Star, Mail, Phone, ArrowLeft, GraduationCap, CreditCard, Clock, ClipboardList
+  Zap, Star, Mail, Phone, ArrowLeft, GraduationCap, CreditCard, Clock, ClipboardList, Search
 } from "lucide-react";
 
 function StudentProfile() {
   const dispatch = useDispatch();
   const [view, setView] = useState("profile"); 
   const [showFullWeek, setShowFullWeek] = useState(false);
+  const [examFilter, setExamFilter] = useState("today");
 
   const { student, loading } = useSelector((state) => state.student);
   const { payments, loading: paymentLoading } = useSelector((state) => state.payment);
@@ -29,6 +30,17 @@ function StudentProfile() {
 
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
+  const filteredExams = useMemo(() => {
+    if (!exams) return [];
+    if (examFilter === "today") {
+      return exams.filter(ex => ex.status === "ongoing" || 
+        new Date(ex.examDate).toDateString() === new Date().toDateString());
+    }
+    if (examFilter === "upcoming") return exams.filter(ex => ex.status === "upcoming");
+    if (examFilter === "completed") return exams.filter(ex => ex.status === "completed");
+    return exams;
+  }, [exams, examFilter]);
+
   const handlePaymentClick = () => {
     setView("payments");
     dispatch(getMyPaymentHistory());
@@ -36,9 +48,7 @@ function StudentProfile() {
 
   const handleResultClick = () => {
     setView("results");
-    if (!marks || marks.length === 0) {
-      dispatch(getStudentOwnResult("LATEST_EXAM_ID")); 
-    }
+    dispatch(getStudentOwnResult());
   };
 
   const handleRoutineClick = () => {
@@ -49,6 +59,7 @@ function StudentProfile() {
 
   const handleExamClick = () => {
     setView("exams");
+    setExamFilter("today");
     dispatch(getStudentDashboardExams());
   };
 
@@ -101,7 +112,22 @@ function StudentProfile() {
 
           {view === "exams" && (
             <ContentWrapper title="Exam Schedule" onClose={() => setView("profile")} icon={<ClipboardList className="text-pink-400" />}>
-                {examLoading ? <Loader /> : <ExamTable exams={exams} />}
+                <div className="flex flex-wrap gap-2 mb-8 bg-white/5 p-2 rounded-2xl border border-white/5 w-fit">
+                  {["today", "upcoming", "completed"].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setExamFilter(tab)}
+                      className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                        examFilter === tab 
+                        ? "bg-pink-500 text-white shadow-lg shadow-pink-500/20" 
+                        : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                {examLoading ? <Loader /> : <ExamTable exams={filteredExams} filterType={examFilter} />}
             </ContentWrapper>
           )}
 
@@ -142,14 +168,14 @@ function StudentProfile() {
   );
 }
 
-const ExamTable = ({ exams }) => (
+const ExamTable = ({ exams, filterType }) => (
   <div className="overflow-x-auto">
     <table className="w-full">
       <thead>
         <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
           <th className="pb-4 text-left px-4">Subject & Category</th>
           <th className="pb-4 text-center px-4">Date</th>
-          <th className="pb-4 text-center px-4">Room</th>
+          <th className="pb-4 text-center px-4">Status</th>
           <th className="pb-4 text-right px-4">Time</th>
         </tr>
       </thead>
@@ -169,9 +195,17 @@ const ExamTable = ({ exams }) => (
               <div className="text-[9px] text-slate-500 uppercase">{new Date(exam.examDate).toLocaleDateString('en-US', { weekday: 'short' })}</div>
             </td>
             <td className="py-5 px-4 text-center">
-                <span className="text-xs font-medium text-slate-400 bg-white/5 px-2 py-1 rounded-md border border-white/5">
-                    {exam.roomNumber || "N/A"}
-                </span>
+              <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                exam.status === 'ongoing' 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 animate-pulse' 
+                  : exam.status === 'completed'
+                  ? 'bg-slate-500/10 text-slate-500 border-white/5'
+                  : exam.status === 'cancelled'
+                  ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                  : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+              }`}>
+                {exam.status === 'ongoing' ? '• Running' : exam.status}
+              </span>
             </td>
             <td className="py-5 px-4 text-right">
               <div className="flex flex-col items-end">
@@ -186,8 +220,8 @@ const ExamTable = ({ exams }) => (
           <tr>
             <td colSpan="4" className="py-20 text-center">
                <div className="flex flex-col items-center gap-2 opacity-30">
-                  <ClipboardList size={40} />
-                  <p className="text-xs font-black uppercase tracking-widest">No Exams Found</p>
+                  <Search size={40} />
+                  <p className="text-xs font-black uppercase tracking-widest">No {filterType} exams</p>
                </div>
             </td>
           </tr>
