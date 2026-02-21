@@ -9,12 +9,13 @@ import { getStudentDashboardExams } from "../../redux/slices/examSlice";
 
 import {
   BookOpen, Calendar, ShieldCheck,
-  Zap, Star, Mail, Phone, ArrowLeft, GraduationCap, CreditCard, Clock, ClipboardList, Search
+  Zap, Star, Mail, Phone, ArrowLeft, GraduationCap, CreditCard, Clock, ClipboardList, Search, ChevronRight
 } from "lucide-react";
 
 function StudentProfile() {
   const dispatch = useDispatch();
   const [view, setView] = useState("profile"); 
+  const [selectedExamId, setSelectedExamId] = useState(null);
   const [showFullWeek, setShowFullWeek] = useState(false);
   const [examFilter, setExamFilter] = useState("today");
 
@@ -48,7 +49,13 @@ function StudentProfile() {
 
   const handleResultClick = () => {
     setView("results");
-    dispatch(getStudentOwnResult());
+    setSelectedExamId(null);
+    dispatch(getStudentDashboardExams());
+  };
+
+  const handleSelectExamForResult = (examId) => {
+    setSelectedExamId(examId);
+    dispatch(getStudentOwnResult(examId));
   };
 
   const handleRoutineClick = () => {
@@ -132,8 +139,29 @@ function StudentProfile() {
           )}
 
           {view === "results" && (
-            <ContentWrapper title="Academic Results" onClose={() => setView("profile")} icon={<Star className="text-yellow-400" />}>
-                {resultLoading ? <Loader /> : <ResultTable results={marks} />}
+            <ContentWrapper title="Academic Results" onClose={() => selectedExamId ? setSelectedExamId(null) : setView("profile")} icon={<Star className="text-yellow-400" />}>
+                {examLoading || resultLoading ? <Loader /> : (
+                  !selectedExamId ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {exams?.map((exam) => (
+                        <button 
+                          key={exam._id} 
+                          onClick={() => handleSelectExamForResult(exam._id)}
+                          className="bg-white/[0.02] border border-white/5 rounded-3xl p-6 flex items-center justify-between group hover:bg-white/[0.05] hover:border-indigo-500/30 transition-all text-left"
+                        >
+                          <div>
+                            <span className="text-[10px] font-black uppercase text-indigo-400 tracking-widest">{exam.categoryId?.name}</span>
+                            <h4 className="text-lg font-bold text-white mt-1 uppercase">{exam.subjectId?.name}</h4>
+                            <p className="text-xs text-slate-500 mt-1">{new Date(exam.examDate).toDateString()}</p>
+                          </div>
+                          <ChevronRight className="text-slate-700 group-hover:text-indigo-400 transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <ResultTable results={marks} />
+                  )
+                )}
             </ContentWrapper>
           )}
 
@@ -288,22 +316,29 @@ const RoutineView = ({ routines, todayName, showFullWeek }) => {
 };
 
 const ResultTable = ({ results }) => (
-  <div className="overflow-x-auto">
+  <div className="overflow-x-auto rounded-3xl border border-white/5">
     <table className="w-full">
       <thead>
-        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] border-b border-white/5">
-          <th className="pb-4 text-left px-4">Subject</th>
-          <th className="pb-4 text-center px-4">Total</th>
-          <th className="pb-4 text-right px-4">Grade</th>
+        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] bg-white/5">
+          <th className="py-4 text-left px-6">Subject</th>
+          <th className="py-4 text-center px-4">Theory</th>
+          <th className="py-4 text-center px-4">Practical</th>
+          <th className="py-4 text-center px-4">Total</th>
+          <th className="py-4 text-right px-6">Grade</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-white/[0.02]">
         {results?.map((res, i) => (
           <tr key={i} className="hover:bg-white/[0.02]">
-            <td className="py-5 px-4 font-bold text-slate-200">{res.subjectId?.name}</td>
+            <td className="py-5 px-6 font-bold text-slate-200">{res.subjectId?.name}</td>
+            <td className="py-5 px-4 text-center text-slate-500">{res.theoryMarks || 0}</td>
+            <td className="py-5 px-4 text-center text-slate-500">{res.practicalMarks || 0}</td>
             <td className="py-5 px-4 text-center font-black text-indigo-400">{res.totalMarks}</td>
-            <td className="py-5 px-4 text-right">
-              <span className="px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-lg font-black">{res.grade}</span>
+            <td className="py-5 px-6 text-right">
+              <div className="flex flex-col items-end">
+                <span className={`px-3 py-1 rounded-lg font-black text-[10px] ${res.grade === 'F' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-400'}`}>{res.grade}</span>
+                <span className="text-[8px] text-slate-600 mt-1 uppercase font-bold">Pt: {res.point}</span>
+              </div>
             </td>
           </tr>
         ))}

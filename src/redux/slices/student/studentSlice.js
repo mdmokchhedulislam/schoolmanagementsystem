@@ -8,10 +8,8 @@ export const loginStudent = createAsyncThunk(
     async (credentials, { rejectWithValue }) => {
         try {
             const response = await axios.post(`${API_URL}/login`, credentials);
-            
             localStorage.setItem('token', response.data.token); 
             localStorage.setItem('userRole', 'student'); 
-            
             return response.data; 
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Login failed');
@@ -34,8 +32,24 @@ export const getMyProfile = createAsyncThunk(
     }
 );
 
+export const getStudentsByClassAndSection = createAsyncThunk(
+    'student/getByClassAndSection',
+    async ({ classId, sectionId }, { rejectWithValue }) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_URL}/${classId}/${sectionId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            return response.data.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Failed to fetch students');
+        }
+    }
+);
+
 const initialState = {
     student: null,
+    studentsList: [], 
     token: localStorage.getItem('token') || null,
     loading: false,
     error: null,
@@ -48,6 +62,7 @@ const studentSlice = createSlice({
     reducers: {
         logoutStudent: (state) => {
             state.student = null;
+            state.studentsList = [];
             state.token = null;
             state.isAuthenticated = false;
             localStorage.removeItem('token');
@@ -59,7 +74,6 @@ const studentSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-           
             .addCase(loginStudent.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -74,7 +88,6 @@ const studentSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-
             .addCase(getMyProfile.pending, (state) => {
                 state.loading = true;
             })
@@ -91,6 +104,18 @@ const studentSlice = createSlice({
                     localStorage.removeItem('token');
                     state.token = null;
                 }
+            })
+            .addCase(getStudentsByClassAndSection.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getStudentsByClassAndSection.fulfilled, (state, action) => {
+                state.loading = false;
+                state.studentsList = action.payload;
+            })
+            .addCase(getStudentsByClassAndSection.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
             });
     }
 });

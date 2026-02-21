@@ -2,47 +2,53 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-const API_URL = "/api/v1/marks"; 
-
+const API_URL = "http://localhost:5000/api/v1/result"; 
 
 export const saveBulkMarks = createAsyncThunk(
   "marks/saveBulk",
-  async (marksData, { rejectWithValue }) => {
+  async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await axios.post(`${API_URL}/save-bulk`, marksData);
-      toast.success(data.message);
+      const token = localStorage.getItem("token");
+      const { data } = await axios.post(`${API_URL}/`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success(data.message || "Marks saved successfully!");
       return data.data;
     } catch (error) {
-      toast.error(error.response.data.message);
-      return rejectWithValue(error.response.data.message);
+      const message = error.response?.data?.message || "Something went wrong";
+      toast.error(message);
+      return rejectWithValue(message);
     }
   }
 );
-
 
 export const getMarksBySubject = createAsyncThunk(
   "marks/fetchBySubject",
   async ({ examId, subjectId }, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem("token");
       const { data } = await axios.get(`${API_URL}/get-by-subject`, {
         params: { examId, subjectId },
+        headers: { Authorization: `Bearer ${token}` },
       });
       return data.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch marks");
     }
   }
 );
-
 
 export const getStudentOwnResult = createAsyncThunk(
   "marks/fetchStudentResult",
   async (examId, { rejectWithValue }) => {
     try {
-      const { data } = await axios.get(`${API_URL}/my-result/${examId}`);
+      const token = localStorage.getItem("token");
+      const { data } = await axios.get(`${API_URL}/my-result/${examId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       return data.data;
     } catch (error) {
-      return rejectWithValue(error.response.data.message);
+      return rejectWithValue(error.response?.data?.message || "Failed to fetch result");
     }
   }
 );
@@ -50,8 +56,8 @@ export const getStudentOwnResult = createAsyncThunk(
 const markSlice = createSlice({
   name: "marks",
   initialState: {
-    marksList: [],      
-    studentResult: [], 
+    marksList: [],
+    studentResult: null,
     loading: false,
     error: null,
   },
@@ -62,9 +68,9 @@ const markSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Bulk Save
       .addCase(saveBulkMarks.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(saveBulkMarks.fulfilled, (state, action) => {
         state.loading = false;
@@ -74,8 +80,6 @@ const markSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Get Marks by Subject
       .addCase(getMarksBySubject.pending, (state) => {
         state.loading = true;
       })
@@ -87,8 +91,6 @@ const markSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Get Student Own Result
       .addCase(getStudentOwnResult.pending, (state) => {
         state.loading = true;
       })
