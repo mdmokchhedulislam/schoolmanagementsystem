@@ -21,9 +21,9 @@ function StudentProfile() {
 
   const { student, loading } = useSelector((state) => state.student);
   const { payments, loading: paymentLoading } = useSelector((state) => state.payment);
-  const { marks = [], loading: resultLoading } = useSelector((state) => state.marks || {});
-  const { studentRoutine, loading: routineLoading } = useSelector((state) => state.routine || {});
-  const { exams = [], loading: examLoading } = useSelector((state) => state.exams || {});
+  const { studentResult, loading: resultLoading } = useSelector((state) => state.marks);
+  const { studentRoutine, loading: routineLoading } = useSelector((state) => state.routine);
+  const { exams = [], loading: examLoading } = useSelector((state) => state.exams);
 
   useEffect(() => {
     if (!student) dispatch(getMyProfile());
@@ -139,9 +139,13 @@ function StudentProfile() {
           )}
 
           {view === "results" && (
-            <ContentWrapper title="Academic Results" onClose={() => selectedExamId ? setSelectedExamId(null) : setView("profile")} icon={<Star className="text-yellow-400" />}>
-                {examLoading || resultLoading ? <Loader /> : (
-                  !selectedExamId ? (
+            <ContentWrapper 
+              title={selectedExamId ? "Mark Sheet" : "Academic Results"} 
+              onClose={() => selectedExamId ? setSelectedExamId(null) : setView("profile")} 
+              icon={<Star className="text-yellow-400" />}
+            >
+                {!selectedExamId ? (
+                  examLoading ? <Loader /> : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {exams?.map((exam) => (
                         <button 
@@ -158,9 +162,9 @@ function StudentProfile() {
                         </button>
                       ))}
                     </div>
-                  ) : (
-                    <ResultTable results={marks} />
                   )
+                ) : (
+                  resultLoading ? <Loader /> : <ResultTable results={studentResult} />
                 )}
             </ContentWrapper>
           )}
@@ -195,6 +199,58 @@ function StudentProfile() {
     </div>
   );
 }
+
+const ResultTable = ({ results }) => {
+  const dataList = useMemo(() => {
+    if (!results) return [];
+    return Array.isArray(results) ? results : [results];
+  }, [results]);
+
+  return (
+    <div className="overflow-x-auto rounded-3xl border border-white/5">
+      <table className="w-full">
+        <thead>
+          <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] bg-white/5">
+            <th className="py-4 text-left px-6">Subject</th>
+            <th className="py-4 text-center px-4">Theory</th>
+            <th className="py-4 text-center px-4">Practical</th>
+            <th className="py-4 text-center px-4">Total</th>
+            <th className="py-4 text-right px-6">Grade</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/[0.02]">
+          {dataList.length > 0 ? dataList.map((res, i) => (
+            <tr key={i} className="hover:bg-white/[0.02]">
+              <td className="py-5 px-6 font-bold text-slate-200">
+                {res?.subjectId?.name || res?.subjectName || "N/A"}
+              </td>
+              <td className="py-5 px-4 text-center text-slate-500">{res?.theoryMarks ?? 0}</td>
+              <td className="py-5 px-4 text-center text-slate-500">{res?.practicalMarks ?? 0}</td>
+              <td className="py-5 px-4 text-center font-black text-indigo-400">{res?.totalMarks ?? 0}</td>
+              <td className="py-5 px-6 text-right">
+                <div className="flex flex-col items-end">
+                  <span className={`px-3 py-1 rounded-lg font-black text-[10px] ${res?.grade === 'F' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                    {res?.grade || "N/A"}
+                  </span>
+                  <span className="text-[8px] text-slate-600 mt-1 uppercase font-bold">Pt: {res?.point ?? 0}</span>
+                </div>
+              </td>
+            </tr>
+          )) : (
+              <tr>
+                  <td colSpan="5" className="py-20 text-center">
+                      <div className="flex flex-col items-center gap-2 opacity-30">
+                          <Search size={40} />
+                          <p className="text-xs font-black uppercase tracking-widest">Result Not Published</p>
+                      </div>
+                  </td>
+              </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
 const ExamTable = ({ exams, filterType }) => (
   <div className="overflow-x-auto">
@@ -314,38 +370,6 @@ const RoutineView = ({ routines, todayName, showFullWeek }) => {
     </div>
   );
 };
-
-const ResultTable = ({ results }) => (
-  <div className="overflow-x-auto rounded-3xl border border-white/5">
-    <table className="w-full">
-      <thead>
-        <tr className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] bg-white/5">
-          <th className="py-4 text-left px-6">Subject</th>
-          <th className="py-4 text-center px-4">Theory</th>
-          <th className="py-4 text-center px-4">Practical</th>
-          <th className="py-4 text-center px-4">Total</th>
-          <th className="py-4 text-right px-6">Grade</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-white/[0.02]">
-        {results?.map((res, i) => (
-          <tr key={i} className="hover:bg-white/[0.02]">
-            <td className="py-5 px-6 font-bold text-slate-200">{res.subjectId?.name}</td>
-            <td className="py-5 px-4 text-center text-slate-500">{res.theoryMarks || 0}</td>
-            <td className="py-5 px-4 text-center text-slate-500">{res.practicalMarks || 0}</td>
-            <td className="py-5 px-4 text-center font-black text-indigo-400">{res.totalMarks}</td>
-            <td className="py-5 px-6 text-right">
-              <div className="flex flex-col items-end">
-                <span className={`px-3 py-1 rounded-lg font-black text-[10px] ${res.grade === 'F' ? 'bg-red-500/10 text-red-500' : 'bg-emerald-500/10 text-emerald-400'}`}>{res.grade}</span>
-                <span className="text-[8px] text-slate-600 mt-1 uppercase font-bold">Pt: {res.point}</span>
-              </div>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
 
 const PaymentTable = ({ payments }) => (
   <div className="overflow-x-auto">
