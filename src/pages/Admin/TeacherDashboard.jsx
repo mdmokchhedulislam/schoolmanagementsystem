@@ -11,13 +11,14 @@ import {
   Lock,
   ChevronRight,
   Save,
-  ArrowLeft
+  ArrowLeft,
+  Wallet
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { getTeacherRoutine } from "../../redux/slices/routine_slice"; 
 import { getTeacherExams } from "../../redux/slices/examSlice"; 
-import { getMarksBySubject, saveBulkMarks } from "../../redux/slices/result_slice";
-
+import { getMarksBySubject } from "../../redux/slices/result_slice";
+import { fetchTeacherProfile } from "../../redux/slices/teacherSlice";
 
 const TeacherDashboard = () => {
   const dispatch = useDispatch();
@@ -26,16 +27,20 @@ const TeacherDashboard = () => {
 
   const { teacherRoutine, loading } = useSelector((state) => state.routine);
   const { profile } = useSelector((state) => state.teachers);
-  console.log("teacher routine is", teacherRoutine);
 
   useEffect(() => {
     dispatch(getTeacherRoutine());
-  }, [dispatch]);
+    if (!profile) {
+      dispatch(fetchTeacherProfile());
+    }
+  }, [dispatch, profile]);
 
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
   const displayDate = new Date().toLocaleDateString('en-GB', { 
     day: 'numeric', month: 'short', year: 'numeric' 
   });
+
+  const isAccountant = profile?.role?.toLowerCase() === "accountant";
 
   const isPeriodActive = (startTime, endTime, day) => {
     if (day !== todayName) return false;
@@ -68,7 +73,7 @@ const TeacherDashboard = () => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-800">Welcome, {profile?.name || "Teacher"}</h1>
-              <p className="text-sm text-slate-500 font-medium">{profile?.designation || "Faculty"}</p>
+              <p className="text-sm text-slate-500 font-medium uppercase">{profile?.role} • {profile?.designation}</p>
             </div>
           </div>
           <div className="mt-4 md:mt-0 flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl">
@@ -80,8 +85,19 @@ const TeacherDashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <QuickActionCard icon={<ClipboardCheck className="text-indigo-600" />} title="Attendance" desc="Quick Link" onClick={() => navigate("/dashboard/teacher/atten")} color="bg-indigo-50" />
           <QuickActionCard icon={<UserPlus className="text-emerald-600" />} title="Add Marks" desc="Input results" onClick={() => navigate("/dashboard/teacher/exams-for-marks")} color="bg-emerald-50" />
+          
+          {isAccountant && (
+            <QuickActionCard 
+              icon={<Wallet className="text-rose-600" />} 
+              title="Account Record" 
+              desc="Financials" 
+              onClick={() => navigate("/dashboard/teacher/accounts")} 
+              color="bg-rose-50" 
+            />
+          )}
+
           <QuickActionCard icon={<Users className="text-orange-600" />} title="Students" desc="View list" onClick={() => {}} color="bg-orange-50" />
-          <QuickActionCard icon={<BookOpen className="text-purple-600" />} title="Resources" desc="Study material" onClick={() => {}} color="bg-purple-50" />
+          {!isAccountant && <QuickActionCard icon={<BookOpen className="text-purple-600" />} title="Resources" desc="Study material" onClick={() => {}} color="bg-purple-50" />}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -199,7 +215,6 @@ export const MarksEntryPage = () => {
       theoryMarks: localScores[studentId]?.theory ?? 0,
       practicalMarks: localScores[studentId]?.practical ?? 0
     };
-    dispatch(saveOrUpdateMark(payload));
   };
 
   return (

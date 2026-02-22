@@ -33,6 +33,7 @@ import AttendancePage from "./pages/dashboard/Teacher/Attendance";
 import TeacherDashboard from "./pages/Admin/TeacherDashboard";
 import Add_exam_mark from "./pages/Admin/teacher/Add_exam_mark";
 import MarksEntryPage from "./pages/Admin/teacher/Mark_entry";
+import { AccountRecordPage } from "./pages/Admin/teacher/Account_record";
 
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
       <Route path="/dashboard/student" element={<StudentManagement />} />
       <Route path="/dashboard/student/fees" element={<StudentFee />} />
       <Route path="/dashboard/teacher" element={<TeacherDashboard />} />
+      <Route path="/dashboard/teacher/accounts" element={<AccountRecordPage />} />
       <Route path="/dashboard/teacher/exams-for-marks" element={<Add_exam_mark />} />
       <Route path="/dashboard/teacher/add-marks/:examId/:subjectId/:classId/:sectionId" 
   element={<MarksEntryPage />}/>

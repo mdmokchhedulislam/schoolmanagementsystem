@@ -30,6 +30,7 @@ import attendanceReducer from "./slices/attendance_slice";
 import holidaysReducer from "./slices/holiday_slice";
 import marksReducer from "./slices/result_slice";
 import examsReducer from "./slices/examSlice";
+import transactionsReducer from "./slices/transition_slice";
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -49,7 +50,8 @@ const rootReducer = combineReducers({
   attendance:attendanceReducer,
   holidays:holidaysReducer,
   marks:marksReducer,
-  exams:examsReducer
+  exams:examsReducer,
+  transactions:transactionsReducer
 });
 
 
