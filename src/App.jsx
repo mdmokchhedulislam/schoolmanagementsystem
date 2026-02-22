@@ -34,6 +34,7 @@ import TeacherDashboard from "./pages/Admin/TeacherDashboard";
 import Add_exam_mark from "./pages/Admin/teacher/Add_exam_mark";
 import MarksEntryPage from "./pages/Admin/teacher/Mark_entry";
 import { AccountRecordPage } from "./pages/Admin/teacher/Account_record";
+import TransactionHistory from "./pages/Admin/Transaction";
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
       <Route path="/admin/signup" element={<AdminSignup />} />
       <Route path="/admin/login" element={<TeacherLogin />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
+      <Route path="/admin/dashboard/transactions" element={<TransactionHistory />} />
       <Route path="/admin/dashboard/teachers" element={<TeacherPage />} />
       <Route path="/admin/dashboard/routine" element={<Routine_page />} />
       <Route path="/admin/dashboard/routine/add" element={<AddRoutine />} />
