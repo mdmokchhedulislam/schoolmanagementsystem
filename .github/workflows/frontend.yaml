@@ -35,7 +35,7 @@ jobs:
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=latest
+            type=raw,value=latest
             type=sha
             type=ref,event=branch
             type=semver,pattern={{version}}
